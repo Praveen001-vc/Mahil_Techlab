@@ -1,0 +1,7 @@
+Django==5.2.4
+psycopg2-binary==2.9.11
+django-allauth==65.14.3
+PyJWT[crypto]==2.10.1
+dj-database-url==2.3.0
+gunicorn==23.0.0
+whitenoise==6.9.0

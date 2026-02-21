@@ -1,0 +1,133 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mahil Techlab | IT Company and Courses{% endblock %}
+{% block meta_description %}Mahil Techlab builds web solutions and teaches practical IT courses.{% endblock %}
+
+{% block content %}
+<section class="hero section reveal">
+  <div class="container hero-grid">
+    <div>
+      <p class="kicker">Build. Teach. Scale.</p>
+      <h1>Technology Partner + Training Center in One Place</h1>
+      <p class="lead">We help businesses modernize systems and help learners launch IT careers with project-based courses.</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="{% url 'courses' %}">Explore Courses</a>
+        <a class="btn btn-outline" href="{% url 'contact' %}">Talk to Our Team</a>
+        {% if pos_installer_enabled %}
+          <a class="btn btn-light" href="{% url 'download_pos_installer' %}">Install MahilMart POS</a>
+        {% elif not user.is_authenticated %}
+          <a class="btn btn-light" href="{% url 'login' %}?next={% url 'download_pos_installer' %}">Login to Install App</a>
+        {% endif %}
+      </div>
+      {% if pos_installer_enabled %}
+        <p class="hint-text">Windows installer powered by Inno Setup.</p>
+      {% elif not user.is_authenticated %}
+        <p class="hint-text">Login required to install the desktop app.</p>
+      {% else %}
+        <p class="hint-text">Installer is not available right now.</p>
+      {% endif %}
+    </div>
+    <div class="hero-card">
+      <h2>What We Deliver</h2>
+      <ul>
+        <li>Custom software and web application development</li>
+        <li>Cloud deployment and support</li>
+        <li>Hands-on IT career training programs</li>
+        <li>Mentor-led project coaching</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">IT Services</p>
+      <h2>Engineering Support for Growing Businesses</h2>
+    </div>
+    <div class="card-grid three-up">
+      <article class="feature-card">
+        <h3>Web Application Development</h3>
+        <p>Scalable applications built with modern architecture for speed, security, and growth.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Business Automation</h3>
+        <p>Automate repetitive workflows with custom integrations and internal dashboards.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Managed Technical Support</h3>
+        <p>Release support, monitoring, and maintenance to keep systems stable and reliable.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Our Projects</p>
+      <h2>Products Built by Mahil Techlab</h2>
+    </div>
+    <div class="card-grid three-up">
+      {% for project in featured_projects %}
+        <article class="feature-card project-card">
+          <div class="project-title-row">
+            {% if project.icon_url %}
+              <img src="{{ project.icon_url }}" alt="{{ project.name }} icon" class="project-icon">
+            {% else %}
+              <span class="project-icon-fallback">{{ project.name|slice:":2"|upper }}</span>
+            {% endif %}
+            <h3>{{ project.name }}</h3>
+          </div>
+          {% if project.tagline %}<p class="project-tagline">{{ project.tagline }}</p>{% endif %}
+          <p>{{ project.short_description|truncatechars:130 }}</p>
+          <div class="hero-actions">
+            <a class="btn btn-outline" href="{% url 'project_detail' project.slug %}">Details</a>
+            {% if project.install_link %}
+              <a class="btn btn-solid" href="{{ project.install_link }}">Install</a>
+            {% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-state">No projects added yet. Add projects from the admin panel.</p>
+      {% endfor %}
+    </div>
+    <div class="center-content" style="margin-top: 1rem;">
+      <a class="btn btn-outline" href="{% url 'projects' %}">View All Projects</a>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Featured Courses</p>
+      <h2>Job-Focused Learning Tracks</h2>
+    </div>
+    <div class="card-grid three-up">
+      {% for course in featured_courses %}
+        <article class="feature-card course-card">
+          <h3>{{ course.title }}</h3>
+          <div class="course-meta">
+            <span class="course-tag">{{ course.duration_weeks }} Weeks</span>
+            <span class="course-tag">{{ course.level }}</span>
+            <span class="course-tag">${{ course.fee_usd }}</span>
+          </div>
+          <p>{{ course.description|truncatechars:130 }}</p>
+          <a class="btn btn-outline" href="{% url 'courses' %}?course={{ course.slug }}#enroll-form">Enroll</a>
+        </article>
+      {% empty %}
+        <p class="empty-state">No courses added yet. Add courses from the admin panel.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="container cta-band">
+    <h2>Need an IT solution or training plan?</h2>
+    <p>Tell us your business or learning goals and we will build the right roadmap.</p>
+    <a class="btn btn-light" href="{% url 'contact' %}">Start a Conversation</a>
+  </div>
+</section>
+{% endblock %}

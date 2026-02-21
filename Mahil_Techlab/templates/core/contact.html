@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+
+{% block title %}Contact | Mahil Techlab{% endblock %}
+{% block meta_description %}Contact Mahil Techlab for IT services and course inquiries.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container split-layout">
+    <div>
+      <div class="section-head left">
+        <p class="kicker">Contact Us</p>
+        <h1>Start Your Project or Learning Journey</h1>
+      </div>
+      <p>Tell us if you need IT services for your company, team training, or personal career guidance.</p>
+      <div class="contact-list">
+        <p><strong>Email:</strong> info@mahiltechlab.com</p>
+        <p><strong>Phone:</strong> +1 (555) 102-9000</p>
+        <p><strong>Hours:</strong> Mon-Sat, 9:00 AM - 7:00 PM</p>
+      </div>
+    </div>
+
+    <form method="post" class="form-card" novalidate>
+      {% csrf_token %}
+
+      <label for="{{ contact_form.name.id_for_label }}">Full Name</label>
+      {{ contact_form.name }}
+      {% if contact_form.name.errors %}<p class="field-error">{{ contact_form.name.errors.0 }}</p>{% endif %}
+
+      <label for="{{ contact_form.email.id_for_label }}">Email</label>
+      {{ contact_form.email }}
+      {% if contact_form.email.errors %}<p class="field-error">{{ contact_form.email.errors.0 }}</p>{% endif %}
+
+      <label for="{{ contact_form.company.id_for_label }}">Company / Organization</label>
+      {{ contact_form.company }}
+      {% if contact_form.company.errors %}<p class="field-error">{{ contact_form.company.errors.0 }}</p>{% endif %}
+
+      <label for="{{ contact_form.message.id_for_label }}">How can we help?</label>
+      {{ contact_form.message }}
+      {% if contact_form.message.errors %}<p class="field-error">{{ contact_form.message.errors.0 }}</p>{% endif %}
+
+      <button type="submit" class="btn btn-solid">Send Message</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

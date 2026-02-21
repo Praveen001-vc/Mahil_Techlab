@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+
+{% block title %}Page Not Found | Mahil Techlab{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container center-content">
+    <p class="kicker">404</p>
+    <h1>Page Not Found</h1>
+    <p>The page you requested does not exist.</p>
+    <a class="btn btn-solid" href="{% url 'home' %}">Back to Home</a>
+  </div>
+</section>
+{% endblock %}

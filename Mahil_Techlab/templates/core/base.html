@@ -1,0 +1,66 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Mahil Techlab{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Mahil Techlab provides IT services and practical IT courses.{% endblock %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script defer src="{% static 'js/main.js' %}"></script>
+</head>
+<body>
+  <div class="background-orb orb-1"></div>
+  <div class="background-orb orb-2"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="{% url 'home' %}" class="brand" aria-label="Mahil Techlab Home">
+        <span class="brand-mark">MT</span>
+        <span class="brand-text">Mahil Techlab</span>
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="site-nav">
+        <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+        <a href="{% url 'projects' %}" class="{% if request.resolver_match.url_name == 'projects' or request.resolver_match.url_name == 'project_detail' %}active{% endif %}">Projects</a>
+        <a href="{% url 'courses' %}" class="{% if request.resolver_match.url_name == 'courses' %}active{% endif %}">Courses</a>
+        <a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+        {% if user.is_authenticated %}
+          {% if user.is_superuser %}
+            <a href="{% url 'admin_users' %}" class="{% if request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_edit' %}active{% endif %}">Admin Users</a>
+          {% endif %}
+          <span class="nav-user">Hi, {{ user.username }}</span>
+          <form method="post" action="{% url 'logout' %}" class="nav-inline-form">
+            {% csrf_token %}
+            <button type="submit" class="nav-btn">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
+          <a href="{% url 'register' %}?next={{ request.path|urlencode }}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% if messages %}
+      <section class="section compact-top">
+        <div class="container">
+          {% for message in messages %}
+            <p class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <p>&copy; <span id="year"></span> Mahil Techlab. All rights reserved.</p>
+      <p>IT Services &bull; IT Courses &bull; Career Skills</p>
+    </div>
+  </footer>
+</body>
+</html>
+

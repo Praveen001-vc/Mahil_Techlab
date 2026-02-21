@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Complete Signup" %} | Mahil Techlab{% endblock %}
+{% block meta_description %}Complete your Google account signup for Mahil Techlab courses and services.{% endblock %}
+
+{% block content %}
+<section class="section reveal auth-premium-section">
+  <div class="container auth-premium-grid">
+    <div class="auth-premium-copy">
+      <p class="kicker">Secure Social Access</p>
+      <h1>Finish Your Premium Account Setup</h1>
+      <p class="lead">
+        {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+          You are about to use your {{ provider_name }} account to login to {{ site_name }}.
+          Complete this final step to unlock course applications and personalized support.
+        {% endblocktrans %}
+      </p>
+      <div class="auth-chip-row">
+        <span class="auth-chip">Fast Onboarding</span>
+        <span class="auth-chip">Verified Identity</span>
+        <span class="auth-chip">Priority Support</span>
+      </div>
+    </div>
+
+    <div class="form-card auth-premium-card">
+      <h3>Complete Sign Up</h3>
+      <p class="hint-text">Review your details and create your account.</p>
+
+      <form method="post" action="{% url 'socialaccount_signup' %}" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <p class="field-error">{{ form.non_field_errors.0 }}</p>
+        {% endif %}
+
+        {% for field in form %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+        {% endfor %}
+
+        {{ redirect_field }}
+        <button type="submit" class="btn btn-solid auth-submit-btn">{% trans "Create Account" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

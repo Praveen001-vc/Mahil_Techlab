@@ -1,0 +1,128 @@
+{% extends "core/base.html" %}
+
+{% block title %}Admin User Management | Mahil Techlab{% endblock %}
+{% block meta_description %}Manage application users with add, edit, and delete access controls.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container admin-container">
+    <div class="section-head left">
+      <p class="kicker">Admin Access</p>
+      <h1>User Management</h1>
+      <p class="lead">Create, edit, and delete user accounts from one secure dashboard.</p>
+    </div>
+
+    <div class="admin-users-layout">
+      <div class="form-card admin-create-card">
+        <h3>Add New User</h3>
+        <p class="hint-text">Only superusers can create and manage accounts here.</p>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if create_form.non_field_errors %}
+            <p class="field-error">{{ create_form.non_field_errors.0 }}</p>
+          {% endif %}
+
+          {% for field in create_form %}
+            {% if field.field.widget.input_type == "checkbox" %}
+              <label class="admin-checkline">
+                {{ field }}
+                <span>{{ field.label }}</span>
+              </label>
+            {% else %}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {% if field.name == "password1" or field.name == "password2" %}
+                <div class="password-field">
+                  {{ field }}
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    data-toggle-password
+                    data-target-id="{{ field.id_for_label }}"
+                    aria-label="Show password"
+                    aria-pressed="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M12 5c-6 0-9.8 6.4-9.9 6.7a.7.7 0 0 0 0 .7C2.2 12.6 6 19 12 19s9.8-6.4 9.9-6.7a.7.7 0 0 0 0-.7C21.8 11.4 18 5 12 5zm0 12.5c-4.6 0-7.8-4.5-8.5-5.8.7-1.3 3.9-5.8 8.5-5.8s7.8 4.5 8.5 5.8c-.7 1.3-3.9 5.8-8.5 5.8zm0-9a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zm0 5a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z"></path>
+                    </svg>
+                  </button>
+                </div>
+              {% else %}
+                {{ field }}
+              {% endif %}
+            {% endif %}
+            {% if field.help_text %}<p class="hint-text">{{ field.help_text|safe }}</p>{% endif %}
+            {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+          {% endfor %}
+
+          <button type="submit" class="btn btn-solid admin-submit-btn">Add User</button>
+        </form>
+      </div>
+
+      <div class="admin-list-card">
+        <div class="admin-list-head">
+          <h3>Existing Users</h3>
+          <form method="get" class="admin-search-form">
+            <input type="text" name="q" placeholder="Search username, email, name..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-outline">Search</button>
+          </form>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for member in users %}
+                <tr>
+                  <td data-label="Username">
+                    <strong>{{ member.username }}</strong>
+                    {% if member.id == user.id %}<span class="admin-badge self-badge">You</span>{% endif %}
+                  </td>
+                  <td data-label="Name">{{ member.first_name }} {{ member.last_name }}</td>
+                  <td data-label="Email">{{ member.email }}</td>
+                  <td data-label="Roles">
+                    {% if member.is_superuser %}<span class="admin-badge role-super">Superuser</span>{% endif %}
+                    {% if member.is_staff %}<span class="admin-badge role-staff">Staff</span>{% endif %}
+                  </td>
+                  <td data-label="Status">
+                    {% if member.is_active %}
+                      <span class="admin-badge status-active">Active</span>
+                    {% else %}
+                      <span class="admin-badge status-inactive">Inactive</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Joined">{{ member.date_joined|date:"Y-m-d H:i" }}</td>
+                  <td data-label="Actions">
+                    <div class="admin-actions">
+                      <a href="{% url 'admin_user_edit' member.id %}" class="btn btn-outline admin-mini-btn">Edit</a>
+                      <form method="post" action="{% url 'admin_user_delete' member.id %}" onsubmit="return confirm('Delete user {{ member.username }}?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn admin-danger-btn">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7">No users found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

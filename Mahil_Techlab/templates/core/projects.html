@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+
+{% block title %}Projects | Mahil Techlab{% endblock %}
+{% block meta_description %}View Mahil Techlab software projects, install links, and full product details.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Software Projects</p>
+      <h1>Our Product Portfolio</h1>
+      <p class="lead">View project details, features, and install options.</p>
+    </div>
+
+    <div class="card-grid three-up">
+      {% for project in projects %}
+        <article class="feature-card project-card">
+          <div class="project-title-row">
+            {% if project.icon_url %}
+              <img src="{{ project.icon_url }}" alt="{{ project.name }} icon" class="project-icon">
+            {% else %}
+              <span class="project-icon-fallback">{{ project.name|slice:":2"|upper }}</span>
+            {% endif %}
+            <div>
+              <h3>{{ project.name }}</h3>
+              {% if project.version %}<p class="project-version">Version {{ project.version }}</p>{% endif %}
+            </div>
+          </div>
+
+          {% if project.tagline %}<p class="project-tagline">{{ project.tagline }}</p>{% endif %}
+          <p>{{ project.short_description }}</p>
+
+          <div class="hero-actions">
+            <a class="btn btn-outline" href="{% url 'project_detail' project.slug %}">Details</a>
+            {% if project.install_link %}
+              <a class="btn btn-solid" href="{{ project.install_link }}">Install</a>
+            {% elif not user.is_authenticated %}
+              <a class="btn btn-light" href="{% url 'login' %}?next={% url 'project_detail' project.slug %}">Login to Install</a>
+            {% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-state">No projects available yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
