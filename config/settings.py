@@ -35,12 +35,18 @@ def env_list(name, default=""):
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-in-production")
 DEBUG = env_bool("DEBUG", True)
 
+DEFAULT_ALLOWED_HOSTS = "127.0.0.1,localhost,mahil-techlab.onrender.com,mahil-techlab-web.onrender.com"
+DEFAULT_CSRF_TRUSTED_ORIGINS = (
+    "http://127.0.0.1:8000,http://localhost:8000,"
+    "https://mahil-techlab.onrender.com,https://mahil-techlab-web.onrender.com"
+)
+
 ALLOW_ALL_HOSTS = env_bool("ALLOW_ALL_HOSTS", False)
 if ALLOW_ALL_HOSTS:
     ALLOWED_HOSTS = ["*"]
 else:
-    ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
+    ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", DEFAULT_ALLOWED_HOSTS)
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", DEFAULT_CSRF_TRUSTED_ORIGINS)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -158,8 +164,12 @@ DEFAULT_POS_INSTALLER_PATH = (
     / "MahilMartPOS-Setup.exe"
 )
 POS_INSTALLER_PATH = (os.getenv("POS_INSTALLER_PATH") or str(DEFAULT_POS_INSTALLER_PATH)).strip()
-POS_INSTALLER_URL = os.getenv("POS_INSTALLER_URL", "").strip()
-POS_INSTALLER_FILENAME = os.getenv("POS_INSTALLER_FILENAME", "MahilMartPOS-Setup.exe").strip()
+DEFAULT_POS_INSTALLER_URL = (
+    "https://raw.githubusercontent.com/Praveen001-vc/"
+    "mahilmart-pos-Version01/main/MahilMartPOS-Setup.iss"
+)
+POS_INSTALLER_URL = os.getenv("POS_INSTALLER_URL", DEFAULT_POS_INSTALLER_URL).strip()
+POS_INSTALLER_FILENAME = os.getenv("POS_INSTALLER_FILENAME", "MahilMartPOS-Setup.iss").strip()
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
