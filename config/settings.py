@@ -35,18 +35,29 @@ def env_list(name, default=""):
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-in-production")
 DEBUG = env_bool("DEBUG", True)
 
-DEFAULT_ALLOWED_HOSTS = "127.0.0.1,localhost,mahil-techlab.onrender.com,mahil-techlab-web.onrender.com"
-DEFAULT_CSRF_TRUSTED_ORIGINS = (
-    "http://127.0.0.1:8000,http://localhost:8000,"
-    "https://mahil-techlab.onrender.com,https://mahil-techlab-web.onrender.com"
-)
+DEFAULT_ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "mahil-techlab.onrender.com",
+    "mahil-techlab-web.onrender.com",
+]
+DEFAULT_CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https://mahil-techlab.onrender.com",
+    "https://mahil-techlab-web.onrender.com",
+]
 
 ALLOW_ALL_HOSTS = env_bool("ALLOW_ALL_HOSTS", False)
 if ALLOW_ALL_HOSTS:
     ALLOWED_HOSTS = ["*"]
 else:
-    ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", DEFAULT_ALLOWED_HOSTS)
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", DEFAULT_CSRF_TRUSTED_ORIGINS)
+    configured_allowed_hosts = env_list("ALLOWED_HOSTS", "")
+    ALLOWED_HOSTS = list(dict.fromkeys(DEFAULT_ALLOWED_HOSTS + configured_allowed_hosts))
+configured_csrf_trusted_origins = env_list("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = list(
+    dict.fromkeys(DEFAULT_CSRF_TRUSTED_ORIGINS + configured_csrf_trusted_origins)
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
