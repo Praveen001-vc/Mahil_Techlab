@@ -32,9 +32,9 @@ services:
       - key: SEED_COURSES
         value: "1"
       - key: POS_INSTALLER_URL
-        value: "https://raw.githubusercontent.com/Praveen001-vc/mahilmart-pos-Version01/main/MahilMartPOS-Setup.iss"
+        value: "https://raw.githubusercontent.com/Praveen001-vc/mahilmart-pos-Version01/main/installer/output/MahilMartPOS-Setup.exe"
       - key: POS_INSTALLER_FILENAME
-        value: "MahilMartPOS-Setup.iss"
+        value: "MahilMartPOS-Setup.exe"
 
 databases:
   - name: mahil-techlab-db

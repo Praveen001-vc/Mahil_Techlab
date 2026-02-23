@@ -177,10 +177,10 @@ DEFAULT_POS_INSTALLER_PATH = (
 POS_INSTALLER_PATH = (os.getenv("POS_INSTALLER_PATH") or str(DEFAULT_POS_INSTALLER_PATH)).strip()
 DEFAULT_POS_INSTALLER_URL = (
     "https://raw.githubusercontent.com/Praveen001-vc/"
-    "mahilmart-pos-Version01/main/MahilMartPOS-Setup.iss"
+    "mahilmart-pos-Version01/main/installer/output/MahilMartPOS-Setup.exe"
 )
 POS_INSTALLER_URL = (os.getenv("POS_INSTALLER_URL") or DEFAULT_POS_INSTALLER_URL).strip()
-POS_INSTALLER_FILENAME = (os.getenv("POS_INSTALLER_FILENAME") or "MahilMartPOS-Setup.iss").strip()
+POS_INSTALLER_FILENAME = (os.getenv("POS_INSTALLER_FILENAME") or "MahilMartPOS-Setup.exe").strip()
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
