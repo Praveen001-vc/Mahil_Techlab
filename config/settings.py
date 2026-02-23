@@ -179,8 +179,8 @@ DEFAULT_POS_INSTALLER_URL = (
     "https://raw.githubusercontent.com/Praveen001-vc/"
     "mahilmart-pos-Version01/main/MahilMartPOS-Setup.iss"
 )
-POS_INSTALLER_URL = os.getenv("POS_INSTALLER_URL", DEFAULT_POS_INSTALLER_URL).strip()
-POS_INSTALLER_FILENAME = os.getenv("POS_INSTALLER_FILENAME", "MahilMartPOS-Setup.iss").strip()
+POS_INSTALLER_URL = (os.getenv("POS_INSTALLER_URL") or DEFAULT_POS_INSTALLER_URL).strip()
+POS_INSTALLER_FILENAME = (os.getenv("POS_INSTALLER_FILENAME") or "MahilMartPOS-Setup.iss").strip()
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
