@@ -1,0 +1,20 @@
+New enrollment application received from {{ site_host }}
+
+Name: {{ enrollment.name }}
+Email: {{ enrollment.email }}
+Phone: {{ enrollment.phone|default:"-" }}
+Course: {{ enrollment.course.title }}
+Experience: {{ enrollment.experience }}
+Submitted: {{ submitted_at }}
+
+Notes:
+{{ enrollment.notes|default:"-" }}
+
+Open enrollments in Django admin:
+{{ enrollments_admin_url }}
+
+Open this application in Admin Dashboard:
+{{ enrollment_url }}
+
+All enrollment applications:
+{{ enrollments_url }}

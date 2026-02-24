@@ -11,13 +11,21 @@ Full project documentation:
 ## Core Features
 
 - Responsive public pages: Home, Courses, Contact
+- Home page slider with database-managed image uploads
+- Contact form stores messages and emails them to your configured inbox
 - Registration + Login + Google Login
 - Protected course application flow (login required)
 - Inno Setup installer download button for MahilMart POS
 - Projects portfolio pages with install + details view
+- Superuser-only unified admin dashboard
+  - Messages, courses, and users in one page
+  - URL: `/admin-access/dashboard/`
 - Superuser-only custom user management page
   - Add, edit, delete users
   - URL: `/admin-access/users/`
+- Superuser-only contact message inbox page
+  - View all incoming contact form messages
+  - URL: `/admin-access/messages/`
 - Django admin support
 
 ## Live Deployment (No User Installation)
@@ -84,7 +92,10 @@ Then open:
 - Register: `http://127.0.0.1:8000/register/`
 - Google login: `http://127.0.0.1:8000/accounts/google/login/`
 - Django admin: `http://127.0.0.1:8000/admin/`
+- Admin dashboard: `http://127.0.0.1:8000/admin-access/dashboard/`
+  - Includes Messages, Home Slider, Courses, and Users panels
 - Custom admin users: `http://127.0.0.1:8000/admin-access/users/`
+- Contact messages inbox: `http://127.0.0.1:8000/admin-access/messages/`
 - POS installer download: `http://127.0.0.1:8000/downloads/mahilmart-pos/setup/`
   - Login required before download
 
@@ -95,7 +106,18 @@ Then open:
 - `ALLOW_ALL_HOSTS` (`True` to allow any IP/host without hardcoding)
 - `ALLOWED_HOSTS`
 - `CSRF_TRUSTED_ORIGINS`
+- `MAX_LOGIN_ATTEMPTS` (failed login attempts before temporary lockout)
+- `LOGIN_LOCKOUT_SECONDS` (lockout duration in seconds)
 - `DATABASE_URL` (preferred in production)
+- `SESSION_COOKIE_HTTPONLY`
+- `CSRF_COOKIE_HTTPONLY`
+- `SESSION_COOKIE_SAMESITE`
+- `CSRF_COOKIE_SAMESITE`
+- `SECURE_CONTENT_TYPE_NOSNIFF`
+- `X_FRAME_OPTIONS`
+- `SECURE_REFERRER_POLICY`
+- `SECURE_CROSS_ORIGIN_OPENER_POLICY`
+- `SECURE_CROSS_ORIGIN_RESOURCE_POLICY`
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
@@ -103,9 +125,25 @@ Then open:
 - `POSTGRES_PORT`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+- `EMAIL_BACKEND`
+- `EMAIL_HOST`
+- `EMAIL_PORT`
+- `EMAIL_USE_TLS`
+- `EMAIL_USE_SSL`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+- `DEFAULT_FROM_EMAIL`
+- `SERVER_EMAIL`
+- `CONTACT_RECEIVER_EMAIL` (your inbox for contact form notifications)
 - `POS_INSTALLER_PATH` (local `.exe` path, default points to `~/Documents/GitHub/mahilmart-pos/installer/output/MahilMartPOS-Setup.exe`)
 - `POS_INSTALLER_URL` (optional external download URL, e.g. GitHub Releases)
 - `POS_INSTALLER_FILENAME`
+
+## Security Notes
+
+- Frontend code (HTML/CSS/JS) is always visible in browsers; this is normal for all websites.
+- Keep secrets and sensitive logic on backend only (env vars + server code).
+- In production, set `DEBUG=False`, keep `ALLOW_ALL_HOSTS=False`, and use strict `ALLOWED_HOSTS`.
 
 ## Inno Setup Installer Flow
 

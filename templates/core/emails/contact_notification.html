@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:0;background:#f2efe8;font-family:'Segoe UI',Tahoma,sans-serif;color:#1f2733;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f2efe8;padding:24px 10px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;width:100%;background:#fffdf7;border:1px solid #e6ddd0;border-radius:18px;overflow:hidden;">
+            <tr>
+              <td style="padding:24px 26px;background:linear-gradient(130deg,#0f6d8c,#2c8fac);color:#ffffff;">
+                <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9;">Mahil Techlab</p>
+                <h1 style="margin:0;font-size:24px;line-height:1.2;">New Contact Message</h1>
+                <p style="margin:8px 0 0 0;font-size:14px;opacity:0.95;">A new inquiry was submitted from {{ site_host }}.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 26px 10px 26px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:7px 0;font-size:13px;color:#5f6978;width:130px;">Name</td>
+                    <td style="padding:7px 0;font-size:14px;color:#1f2733;font-weight:600;">{{ contact_message.name }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:7px 0;font-size:13px;color:#5f6978;">Email</td>
+                    <td style="padding:7px 0;font-size:14px;color:#1f2733;font-weight:600;">{{ contact_message.email }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:7px 0;font-size:13px;color:#5f6978;">Company</td>
+                    <td style="padding:7px 0;font-size:14px;color:#1f2733;font-weight:600;">{{ contact_message.company|default:"-" }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:7px 0;font-size:13px;color:#5f6978;">Submitted</td>
+                    <td style="padding:7px 0;font-size:14px;color:#1f2733;font-weight:600;">{{ submitted_at }}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 26px 0 26px;">
+                <p style="margin:0 0 8px 0;font-size:13px;color:#5f6978;">Message</p>
+                <div style="border:1px solid #dce3ea;background:#f8fbfd;border-radius:12px;padding:14px 14px;color:#203040;font-size:14px;line-height:1.6;">
+                  {{ contact_message.message|linebreaksbr }}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 26px 26px 26px;">
+                <a href="{{ message_url }}" style="display:inline-block;background:linear-gradient(130deg,#0f6d8c,#2c8fac);color:#ffffff;text-decoration:none;padding:11px 18px;border-radius:999px;font-size:14px;font-weight:700;">
+                  Open This Message
+                </a>
+                <p style="margin:12px 0 0 0;font-size:12px;color:#6a7483;">
+                  If you are logged out, login is required first and you will be redirected automatically.
+                </p>
+                <p style="margin:8px 0 0 0;font-size:12px;color:#6a7483;">
+                  All messages: <a href="{{ messages_url }}" style="color:#0f6d8c;text-decoration:underline;">{{ messages_url }}</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

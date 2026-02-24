@@ -21,13 +21,11 @@
           <div class="course-meta">
             <span class="course-tag">{{ course.duration_weeks }} Weeks</span>
             <span class="course-tag">{{ course.level }}</span>
-            <span class="course-tag">${{ course.fee_usd }}</span>
+            <a class="course-tag" href="{% url 'contact' %}">Contact Us</a>
           </div>
           <p>{{ course.description|truncatechars:170 }}</p>
-          {% if user.is_authenticated and user.email %}
+          {% if user.is_authenticated %}
             <a class="btn btn-outline" href="#enroll-form" data-course-id="{{ course.id }}" data-course-slug="{{ course.slug }}">Apply for this Course</a>
-          {% elif user.is_authenticated %}
-            <a class="btn btn-outline" href="{% url 'contact' %}">Update Profile to Apply</a>
           {% else %}
             <a class="btn btn-outline" href="{% url 'register' %}?next={{ request.get_full_path|urlencode }}">Register to Apply</a>
           {% endif %}
@@ -48,9 +46,13 @@
       </div>
       <p>Submit your details and our admissions team will contact you with schedule and next steps.</p>
     </div>
-    {% if user.is_authenticated and user.email %}
+    {% if user.is_authenticated %}
       <form method="post" id="enroll-form" class="form-card" novalidate>
         {% csrf_token %}
+
+        <label for="{{ enrollment_form.email.id_for_label }}">Email</label>
+        {{ enrollment_form.email }}
+        {% if enrollment_form.email.errors %}<p class="field-error">{{ enrollment_form.email.errors.0 }}</p>{% endif %}
 
         <label for="{{ enrollment_form.phone.id_for_label }}">Phone</label>
         {{ enrollment_form.phone }}
@@ -70,12 +72,6 @@
 
         <button type="submit" class="btn btn-solid">Submit Enrollment</button>
       </form>
-    {% elif user.is_authenticated %}
-      <div class="form-card auth-locked">
-        <h3>Email Required</h3>
-        <p>Your account does not have an email address yet. Please contact support to update your profile, then apply.</p>
-        <a class="btn btn-outline" href="{% url 'contact' %}">Contact Support</a>
-      </div>
     {% else %}
       <div class="form-card auth-locked">
         <h3>Registration Required</h3>

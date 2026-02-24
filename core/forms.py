@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
-from .models import ContactMessage, Enrollment
+from .models import ContactMessage, Course, Enrollment, HomeSlider
 
 
 class ContactForm(forms.ModelForm):
@@ -20,8 +21,9 @@ class ContactForm(forms.ModelForm):
 class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
-        fields = ["phone", "course", "experience", "notes"]
+        fields = ["email", "phone", "course", "experience", "notes"]
         widgets = {
+            "email": forms.EmailInput(attrs={"placeholder": "you@example.com"}),
             "phone": forms.TextInput(attrs={"placeholder": "+1 ..."}),
             "notes": forms.Textarea(attrs={"rows": 4, "placeholder": "Optional details"}),
         }
@@ -29,6 +31,83 @@ class EnrollmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["course"].queryset = self.fields["course"].queryset.filter(is_active=True)
+        self.fields["email"].help_text = "Use an active inbox. Confirmation email will be sent here."
+
+
+class AdminCourseForm(forms.ModelForm):
+    slug = forms.SlugField(max_length=220, required=False)
+
+    class Meta:
+        model = Course
+        fields = [
+            "title",
+            "slug",
+            "description",
+            "duration_weeks",
+            "level",
+            "fee_usd",
+            "fee_currency",
+            "is_active",
+        ]
+        labels = {
+            "fee_usd": "Fee Amount",
+            "fee_currency": "Fee Currency",
+        }
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Course title"}),
+            "slug": forms.TextInput(attrs={"placeholder": "auto-from-title (optional)"}),
+            "description": forms.Textarea(
+                attrs={"rows": 4, "placeholder": "Course details and outcomes"}
+            ),
+            "duration_weeks": forms.NumberInput(attrs={"min": 1}),
+            "fee_usd": forms.NumberInput(attrs={"step": "0.01", "min": 0}),
+        }
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get("slug", "").strip()
+        title = self.cleaned_data.get("title", "").strip()
+        if slug:
+            return slug
+        return slugify(title)
+
+    def clean(self):
+        cleaned = super().clean()
+        slug = cleaned.get("slug", "").strip()
+        title = cleaned.get("title", "").strip()
+
+        if title and not slug:
+            self.add_error("slug", "Slug cannot be empty. Add a slug or provide a valid title.")
+            return cleaned
+
+        if slug:
+            qs = Course.objects.filter(slug=slug)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error("slug", "A course with this slug already exists.")
+
+        return cleaned
+
+
+class AdminSliderForm(forms.ModelForm):
+    class Meta:
+        model = HomeSlider
+        fields = [
+            "title",
+            "subtitle",
+            "image",
+            "button_label",
+            "button_url",
+            "display_order",
+            "is_active",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Slide title"}),
+            "subtitle": forms.TextInput(attrs={"placeholder": "Optional subtitle"}),
+            "button_label": forms.TextInput(attrs={"placeholder": "Optional button text"}),
+            "button_url": forms.TextInput(attrs={"placeholder": "/contact or https://..."}),
+            "display_order": forms.NumberInput(attrs={"min": 0}),
+        }
 
 
 class SignUpForm(UserCreationForm):

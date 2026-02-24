@@ -4,6 +4,43 @@
 {% block meta_description %}Mahil Techlab builds web solutions and teaches practical IT courses.{% endblock %}
 
 {% block content %}
+{% if home_slides %}
+<section class="section compact-top reveal home-slider-section">
+  <div class="home-slider" data-home-slider>
+    <div class="home-slider-track">
+      {% for slide in home_slides %}
+        <article class="home-slide {% if forloop.first %}is-active{% endif %}" data-slide-index="{{ forloop.counter0 }}">
+          <img src="{{ slide.image.url }}" alt="{{ slide.title }}" class="home-slide-image">
+          <div class="home-slide-overlay">
+            <p class="kicker">Mahil Techlab</p>
+            <h2>{{ slide.title }}</h2>
+            {% if slide.subtitle %}<p>{{ slide.subtitle }}</p>{% endif %}
+            {% if slide.button_label and slide.button_url %}
+              <a class="btn btn-solid" href="{{ slide.button_url }}">{{ slide.button_label }}</a>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+    <button type="button" class="home-slider-nav prev" data-slide-prev aria-label="Previous slide">&#8249;</button>
+    <button type="button" class="home-slider-nav next" data-slide-next aria-label="Next slide">&#8250;</button>
+    <div class="home-slider-dots" role="tablist" aria-label="Home slider controls">
+      {% for slide in home_slides %}
+        <button
+          type="button"
+          class="home-slider-dot {% if forloop.first %}is-active{% endif %}"
+          data-slide-dot="{{ forloop.counter0 }}"
+          aria-label="Go to slide {{ forloop.counter }}"
+        ></button>
+      {% endfor %}
+    </div>
+    <div class="home-slider-progress" aria-hidden="true">
+      <span class="home-slider-progress-bar" data-slide-progress></span>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="hero section reveal">
   <div class="container hero-grid">
     <div>
@@ -111,7 +148,7 @@
           <div class="course-meta">
             <span class="course-tag">{{ course.duration_weeks }} Weeks</span>
             <span class="course-tag">{{ course.level }}</span>
-            <span class="course-tag">${{ course.fee_usd }}</span>
+            <a class="course-tag" href="{% url 'contact' %}">Contact Us</a>
           </div>
           <p>{{ course.description|truncatechars:130 }}</p>
           <a class="btn btn-outline" href="{% url 'courses' %}?course={{ course.slug }}#enroll-form">Enroll</a>

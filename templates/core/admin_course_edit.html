@@ -1,19 +1,19 @@
 {% extends "core/base.html" %}
 
-{% block title %}Edit User | Mahil Techlab{% endblock %}
-{% block meta_description %}Edit user account details and permissions from admin access panel.{% endblock %}
+{% block title %}Edit Course | Mahil Techlab{% endblock %}
+{% block meta_description %}Edit course details and live status from admin access panel.{% endblock %}
 
 {% block content %}
 <section class="section reveal">
-  <div class="container admin-container">
+  <div class="container">
     <div class="section-head left">
       <p class="kicker">Admin Access</p>
-      <h1>Edit User: {{ target_user.username }}</h1>
-      <p class="lead">Update profile data, active status, and role permissions.</p>
+      <h1>Edit Course: {{ target_course.title }}</h1>
+      <p class="lead">Update course details, pricing, and live status.</p>
     </div>
 
     <div class="admin-edit-wrap">
-      <form method="post" class="form-card admin-create-card" novalidate>
+      <form method="post" class="form-card" novalidate>
         {% csrf_token %}
 
         {% if edit_form.non_field_errors %}
@@ -36,7 +36,7 @@
 
         <div class="admin-edit-actions">
           <button type="submit" class="btn btn-solid">Save Changes</button>
-          <a href="{% url 'admin_dashboard' %}?panel=users" class="btn btn-outline">Back to Dashboard</a>
+          <a href="{% url 'admin_dashboard' %}?panel=courses" class="btn btn-outline">Back to Dashboard</a>
         </div>
       </form>
     </div>

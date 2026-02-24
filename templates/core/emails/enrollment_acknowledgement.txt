@@ -1,0 +1,9 @@
+Hello {{ enrollment.name }},
+
+Thank you for submitting your enrollment application to Mahil Techlab.
+We received your request for "{{ enrollment.course.title }}" and our team will contact you soon.
+
+Registered email: {{ enrollment.email }}
+Experience level: {{ enrollment.experience }}
+
+This is an automated acknowledgement from {{ site_host }}.

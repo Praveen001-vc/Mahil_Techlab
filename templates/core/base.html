@@ -16,7 +16,7 @@
   <header class="site-header">
     <div class="container nav-wrap">
       <a href="{% url 'home' %}" class="brand" aria-label="Mahil Techlab Home">
-        <span class="brand-mark">MT</span>
+        <img src="{% static 'css/MahilTechLab_logo.jpeg' %}" alt="Mahil Techlab logo" class="brand-logo">
         <span class="brand-text">Mahil Techlab</span>
       </a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
@@ -27,7 +27,7 @@
         <a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
         {% if user.is_authenticated %}
           {% if user.is_superuser %}
-            <a href="{% url 'admin_users' %}" class="{% if request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_edit' %}active{% endif %}">Admin Users</a>
+            <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_contact_messages' or request.resolver_match.url_name == 'admin_enrollments' or request.resolver_match.url_name == 'admin_courses' or request.resolver_match.url_name == 'admin_course_edit' or request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_edit' or request.resolver_match.url_name == 'admin_sliders' or request.resolver_match.url_name == 'admin_slider_edit' %}active{% endif %}">Admin Dashboard</a>
           {% endif %}
           <span class="nav-user">Hi, {{ user.username }}</span>
           <form method="post" action="{% url 'logout' %}" class="nav-inline-form">
@@ -42,16 +42,15 @@
     </div>
   </header>
 
+  {% if messages %}
+    <div class="flash-stack" aria-live="polite" aria-atomic="true">
+      {% for message in messages %}
+        <p class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}" data-flash-message>{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <main>
-    {% if messages %}
-      <section class="section compact-top">
-        <div class="container">
-          {% for message in messages %}
-            <p class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</p>
-          {% endfor %}
-        </div>
-      </section>
-    {% endif %}
     {% block content %}{% endblock %}
   </main>
 

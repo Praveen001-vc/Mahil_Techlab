@@ -1,0 +1,469 @@
+{% extends "core/base.html" %}
+
+{% block title %}Admin Dashboard | Mahil Techlab{% endblock %}
+{% block meta_description %}Unified admin dashboard for messages, enrollments, courses, sliders, and users.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container admin-container">
+    <div class="section-head left">
+      <p class="kicker">Admin Access</p>
+      <h1>Admin Dashboard</h1>
+      <p class="lead">Manage messages, enrollments, courses, slider items, and users from one page.</p>
+    </div>
+
+    <div class="admin-dashboard-tabs">
+      <a href="{% url 'admin_dashboard' %}?panel=messages" class="{% if active_panel == 'messages' %}active{% endif %}">Messages</a>
+      <a href="{% url 'admin_dashboard' %}?panel=enrollments" class="{% if active_panel == 'enrollments' %}active{% endif %}">Enrollments</a>
+      <a href="{% url 'admin_dashboard' %}?panel=sliders" class="{% if active_panel == 'sliders' %}active{% endif %}">Home Slider</a>
+      <a href="{% url 'admin_dashboard' %}?panel=courses" class="{% if active_panel == 'courses' %}active{% endif %}">Courses</a>
+      <a href="{% url 'admin_dashboard' %}?panel=users" class="{% if active_panel == 'users' %}active{% endif %}">Users</a>
+    </div>
+
+    {% if active_panel == "messages" %}
+      <section id="messages-section" class="admin-panel-card">
+        <div class="admin-list-card">
+          <div class="admin-list-head">
+            <h3>Contact Inbox</h3>
+            <form method="get" class="admin-search-form">
+              <input type="hidden" name="panel" value="messages">
+              <input type="text" name="messages_q" placeholder="Search name, email, company, message..." value="{{ messages_query }}">
+              {% if selected_message_id %}<input type="hidden" name="message" value="{{ selected_message_id }}">{% endif %}
+              <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-msg-table">
+              <thead>
+                <tr>
+                  <th>Sender</th>
+                  <th>Contact</th>
+                  <th>Company</th>
+                  <th>Message</th>
+                  <th>Received</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in contact_messages %}
+                  <tr id="msg-{{ item.id }}" class="{% if selected_message_id == item.id %}focus-message-row{% endif %}">
+                    <td data-label="Sender"><strong>{{ item.name }}</strong></td>
+                    <td data-label="Contact">{{ item.email }}</td>
+                    <td data-label="Company">{{ item.company|default:"-" }}</td>
+                    <td data-label="Message">
+                      <div class="admin-message-body">{{ item.message|linebreaksbr }}</div>
+                    </td>
+                    <td data-label="Received">{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                    <td data-label="Action">
+                      <a class="btn btn-outline admin-mini-btn" href="mailto:{{ item.email }}?subject=Re:%20Mahil%20Techlab%20Inquiry">Reply</a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="6">No contact messages found.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    {% elif active_panel == "enrollments" %}
+      <section id="enrollments-section" class="admin-panel-card">
+        <div class="admin-list-card">
+          <div class="admin-list-head">
+            <h3>Enrollment Applications</h3>
+            <form method="get" class="admin-search-form">
+              <input type="hidden" name="panel" value="enrollments">
+              <input type="text" name="enrollments_q" placeholder="Search name, email, course, notes..." value="{{ enrollments_query }}">
+              {% if selected_enrollment_id %}<input type="hidden" name="enrollment" value="{{ selected_enrollment_id }}">{% endif %}
+              <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-msg-table">
+              <thead>
+                <tr>
+                  <th>Applicant</th>
+                  <th>Contact</th>
+                  <th>Course</th>
+                  <th>Experience</th>
+                  <th>Notes</th>
+                  <th>Submitted</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in enrollments %}
+                  <tr id="enroll-{{ item.id }}" class="{% if selected_enrollment_id == item.id %}focus-message-row{% endif %}">
+                    <td data-label="Applicant">
+                      <strong>{{ item.name }}</strong>
+                      {% if item.user %}
+                        <p class="hint-text" style="margin:0.2rem 0 0;">@{{ item.user.username }}</p>
+                      {% endif %}
+                    </td>
+                    <td data-label="Contact">
+                      {{ item.email }}
+                      {% if item.phone %}<br>{{ item.phone }}{% endif %}
+                    </td>
+                    <td data-label="Course">{{ item.course.title }}</td>
+                    <td data-label="Experience">{{ item.experience }}</td>
+                    <td data-label="Notes">
+                      <div class="admin-message-body">{{ item.notes|default:"-"|linebreaksbr }}</div>
+                    </td>
+                    <td data-label="Submitted">{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                    <td data-label="Action">
+                      <a class="btn btn-outline admin-mini-btn" href="mailto:{{ item.email }}?subject=Re:%20Mahil%20Techlab%20Enrollment">Reply</a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="7">No enrollment applications found.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    {% elif active_panel == "courses" %}
+      <section id="courses-section" class="admin-panel-card">
+        <div class="admin-users-layout">
+          <div class="form-card admin-create-card">
+            <h3>Add New Course</h3>
+            <p class="hint-text">Only superusers can manage courses here.</p>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="create_course">
+
+              {% if create_course_form.non_field_errors %}
+                <p class="field-error">{{ create_course_form.non_field_errors.0 }}</p>
+              {% endif %}
+
+              {% for field in create_course_form %}
+                {% if field.field.widget.input_type == "checkbox" %}
+                  <label class="admin-checkline">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                  </label>
+                {% else %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                {% endif %}
+                {% if field.help_text %}<p class="hint-text">{{ field.help_text|safe }}</p>{% endif %}
+                {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+              {% endfor %}
+
+              <button type="submit" class="btn btn-solid admin-submit-btn">Add Course</button>
+            </form>
+          </div>
+
+          <div class="admin-list-card">
+            <div class="admin-list-head">
+              <h3>Existing Courses</h3>
+              <form method="get" class="admin-search-form">
+                <input type="hidden" name="panel" value="courses">
+                <input type="text" name="courses_q" placeholder="Search title, slug, level..." value="{{ courses_query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+              </form>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Slug</th>
+                    <th>Duration</th>
+                    <th>Level</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for course in courses %}
+                    <tr>
+                      <td data-label="Title"><strong>{{ course.title }}</strong></td>
+                      <td data-label="Slug">{{ course.slug }}</td>
+                      <td data-label="Duration">{{ course.duration_weeks }} Weeks</td>
+                      <td data-label="Level">{{ course.level }}</td>
+                      <td data-label="Fee">{{ course.fee_symbol }}{{ course.fee_usd }}</td>
+                      <td data-label="Status">
+                        {% if course.is_active %}
+                          <span class="admin-badge status-active">Live</span>
+                        {% else %}
+                          <span class="admin-badge status-inactive">Off</span>
+                        {% endif %}
+                      </td>
+                      <td data-label="Created">{{ course.created_at|date:"Y-m-d H:i" }}</td>
+                      <td data-label="Actions">
+                        <div class="admin-actions">
+                          <a href="{% url 'admin_course_edit' course.id %}" class="btn btn-outline admin-mini-btn">Edit</a>
+                          <form method="post" action="{% url 'admin_course_toggle_live' course.id %}">
+                            {% csrf_token %}
+                            {% if course.is_active %}
+                              <button type="submit" class="btn admin-toggle-btn toggle-on">Turn Off</button>
+                            {% else %}
+                              <button type="submit" class="btn admin-toggle-btn toggle-off">Turn On</button>
+                            {% endif %}
+                          </form>
+                          <form method="post" action="{% url 'admin_course_delete' course.id %}" onsubmit="return confirm('Delete course {{ course.title }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn admin-danger-btn">Delete</button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="8">No courses found.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    {% elif active_panel == "sliders" %}
+      <section id="sliders-section" class="admin-panel-card">
+        <div class="admin-users-layout">
+          <div class="form-card admin-create-card">
+            <h3>Add Home Slide</h3>
+            <p class="hint-text">Upload slider images and control display order.</p>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="create_slider">
+
+              {% if create_slider_form.non_field_errors %}
+                <p class="field-error">{{ create_slider_form.non_field_errors.0 }}</p>
+              {% endif %}
+
+              {% for field in create_slider_form %}
+                {% if field.field.widget.input_type == "checkbox" %}
+                  <label class="admin-checkline">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                  </label>
+                {% elif field.field.widget.input_type == "file" %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                {% else %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                {% endif %}
+                {% if field.help_text %}<p class="hint-text">{{ field.help_text|safe }}</p>{% endif %}
+                {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+              {% endfor %}
+
+              <button type="submit" class="btn btn-solid admin-submit-btn">Add Slide</button>
+            </form>
+          </div>
+
+          <div class="admin-list-card">
+            <div class="admin-list-head">
+              <h3>Slider Items</h3>
+              <form method="get" class="admin-search-form">
+                <input type="hidden" name="panel" value="sliders">
+                <input type="text" name="sliders_q" placeholder="Search title, subtitle, button..." value="{{ sliders_query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+              </form>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Preview</th>
+                    <th>Title</th>
+                    <th>Subtitle</th>
+                    <th>Button</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for slide in sliders %}
+                    <tr>
+                      <td data-label="Preview">
+                        {% if slide.image %}
+                          <img src="{{ slide.image.url }}" alt="{{ slide.title }}" class="admin-slider-thumb">
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                      <td data-label="Title"><strong>{{ slide.title }}</strong></td>
+                      <td data-label="Subtitle">{{ slide.subtitle|default:"-" }}</td>
+                      <td data-label="Button">
+                        {% if slide.button_label %}
+                          {{ slide.button_label }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                      <td data-label="Order">{{ slide.display_order }}</td>
+                      <td data-label="Status">
+                        {% if slide.is_active %}
+                          <span class="admin-badge status-active">Live</span>
+                        {% else %}
+                          <span class="admin-badge status-inactive">Off</span>
+                        {% endif %}
+                      </td>
+                      <td data-label="Created">{{ slide.created_at|date:"Y-m-d H:i" }}</td>
+                      <td data-label="Actions">
+                        <div class="admin-actions">
+                          <a href="{% url 'admin_slider_edit' slide.id %}" class="btn btn-outline admin-mini-btn">Edit</a>
+                          <form method="post" action="{% url 'admin_slider_toggle_live' slide.id %}">
+                            {% csrf_token %}
+                            {% if slide.is_active %}
+                              <button type="submit" class="btn admin-toggle-btn toggle-on">Turn Off</button>
+                            {% else %}
+                              <button type="submit" class="btn admin-toggle-btn toggle-off">Turn On</button>
+                            {% endif %}
+                          </form>
+                          <form method="post" action="{% url 'admin_slider_delete' slide.id %}" onsubmit="return confirm('Delete slide {{ slide.title }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn admin-danger-btn">Delete</button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="8">No slider items found.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    {% else %}
+      <section id="users-section" class="admin-panel-card">
+        <div class="admin-users-layout">
+          <div class="form-card admin-create-card">
+            <h3>Add New User</h3>
+            <p class="hint-text">Only superusers can create and manage accounts here.</p>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="create_user">
+
+              {% if create_user_form.non_field_errors %}
+                <p class="field-error">{{ create_user_form.non_field_errors.0 }}</p>
+              {% endif %}
+
+              {% for field in create_user_form %}
+                {% if field.field.widget.input_type == "checkbox" %}
+                  <label class="admin-checkline">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                  </label>
+                {% else %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {% if field.name == "password1" or field.name == "password2" %}
+                    <div class="password-field">
+                      {{ field }}
+                      <button
+                        type="button"
+                        class="password-toggle"
+                        data-toggle-password
+                        data-target-id="{{ field.id_for_label }}"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path d="M12 5c-6 0-9.8 6.4-9.9 6.7a.7.7 0 0 0 0 .7C2.2 12.6 6 19 12 19s9.8-6.4 9.9-6.7a.7.7 0 0 0 0-.7C21.8 11.4 18 5 12 5zm0 12.5c-4.6 0-7.8-4.5-8.5-5.8.7-1.3 3.9-5.8 8.5-5.8s7.8 4.5 8.5 5.8c-.7 1.3-3.9 5.8-8.5 5.8zm0-9a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zm0 5a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endif %}
+                {% if field.help_text %}<p class="hint-text">{{ field.help_text|safe }}</p>{% endif %}
+                {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+              {% endfor %}
+
+              <button type="submit" class="btn btn-solid admin-submit-btn">Add User</button>
+            </form>
+          </div>
+
+          <div class="admin-list-card">
+            <div class="admin-list-head">
+              <h3>Existing Users</h3>
+              <form method="get" class="admin-search-form">
+                <input type="hidden" name="panel" value="users">
+                <input type="text" name="users_q" placeholder="Search username, email, name..." value="{{ users_query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+              </form>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for member in users %}
+                    <tr>
+                      <td data-label="Username">
+                        <strong>{{ member.username }}</strong>
+                        {% if member.id == user.id %}<span class="admin-badge self-badge">You</span>{% endif %}
+                      </td>
+                      <td data-label="Name">{{ member.first_name }} {{ member.last_name }}</td>
+                      <td data-label="Email">{{ member.email }}</td>
+                      <td data-label="Roles">
+                        {% if member.is_superuser %}<span class="admin-badge role-super">Superuser</span>{% endif %}
+                        {% if member.is_staff %}<span class="admin-badge role-staff">Staff</span>{% endif %}
+                      </td>
+                      <td data-label="Status">
+                        {% if member.is_active %}
+                          <span class="admin-badge status-active">Active</span>
+                        {% else %}
+                          <span class="admin-badge status-inactive">Inactive</span>
+                        {% endif %}
+                      </td>
+                      <td data-label="Joined">{{ member.date_joined|date:"Y-m-d H:i" }}</td>
+                      <td data-label="Actions">
+                        <div class="admin-actions">
+                          <a href="{% url 'admin_user_edit' member.id %}" class="btn btn-outline admin-mini-btn">Edit</a>
+                          <form method="post" action="{% url 'admin_user_delete' member.id %}" onsubmit="return confirm('Delete user {{ member.username }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn admin-danger-btn">Delete</button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="7">No users found.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

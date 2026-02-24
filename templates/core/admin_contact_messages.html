@@ -1,0 +1,69 @@
+{% extends "core/base.html" %}
+
+{% block title %}Admin Messages | Mahil Techlab{% endblock %}
+{% block meta_description %}View all website contact messages in one secure admin inbox.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container admin-container">
+    <div class="section-head left">
+      <p class="kicker">Admin Access</p>
+      <h1>Contact Messages</h1>
+      <p class="lead">All website inquiries in one secure inbox page.</p>
+    </div>
+
+    <div class="admin-list-card">
+      <div class="admin-list-head">
+        <h3>Inbox</h3>
+        <form method="get" class="admin-search-form">
+          <input type="text" name="q" placeholder="Search name, email, company, message..." value="{{ search_query }}">
+          {% if selected_message_id %}<input type="hidden" name="message" value="{{ selected_message_id }}">{% endif %}
+          <button type="submit" class="btn btn-outline">Search</button>
+        </form>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table admin-msg-table">
+          <thead>
+            <tr>
+              <th>Sender</th>
+              <th>Contact</th>
+              <th>Company</th>
+              <th>Message</th>
+              <th>Received</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in contact_messages %}
+              <tr id="msg-{{ item.id }}" class="{% if selected_message_id == item.id %}focus-message-row{% endif %}">
+                <td data-label="Sender"><strong>{{ item.name }}</strong></td>
+                <td data-label="Contact">
+                  <div>{{ item.email }}</div>
+                </td>
+                <td data-label="Company">{{ item.company|default:"-" }}</td>
+                <td data-label="Message">
+                  <div class="admin-message-body">{{ item.message|linebreaksbr }}</div>
+                </td>
+                <td data-label="Received">{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                <td data-label="Action">
+                  <a
+                    class="btn btn-outline admin-mini-btn"
+                    href="mailto:{{ item.email }}?subject=Re:%20Mahil%20Techlab%20Inquiry"
+                  >
+                    Reply
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6">No contact messages found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

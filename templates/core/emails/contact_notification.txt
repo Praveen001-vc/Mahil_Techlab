@@ -1,0 +1,17 @@
+New contact message received from {{ site_host }}
+
+Name: {{ contact_message.name }}
+Email: {{ contact_message.email }}
+Company: {{ contact_message.company|default:"-" }}
+Submitted: {{ submitted_at }}
+
+Message:
+{{ contact_message.message }}
+
+Open this message:
+{{ message_url }}
+
+All messages inbox:
+{{ messages_url }}
+
+If you are logged out, you will be asked to login first and then redirected automatically.

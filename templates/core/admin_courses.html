@@ -1,0 +1,114 @@
+{% extends "core/base.html" %}
+
+{% block title %}Admin Course Management | Mahil Techlab{% endblock %}
+{% block meta_description %}Manage courses with add, edit, delete, and live on/off controls.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container admin-container">
+    <div class="section-head left">
+      <p class="kicker">Admin Access</p>
+      <h1>Course Management</h1>
+      <p class="lead">Add, edit, delete, and switch course live status from one page.</p>
+    </div>
+
+    <div class="admin-users-layout">
+      <div class="form-card admin-create-card">
+        <h3>Add New Course</h3>
+        <p class="hint-text">Only superusers can manage courses here.</p>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if create_form.non_field_errors %}
+            <p class="field-error">{{ create_form.non_field_errors.0 }}</p>
+          {% endif %}
+
+          {% for field in create_form %}
+            {% if field.field.widget.input_type == "checkbox" %}
+              <label class="admin-checkline">
+                {{ field }}
+                <span>{{ field.label }}</span>
+              </label>
+            {% else %}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+            {% if field.help_text %}<p class="hint-text">{{ field.help_text|safe }}</p>{% endif %}
+            {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
+          {% endfor %}
+
+          <button type="submit" class="btn btn-solid admin-submit-btn">Add Course</button>
+        </form>
+      </div>
+
+      <div class="admin-list-card">
+        <div class="admin-list-head">
+          <h3>Existing Courses</h3>
+          <form method="get" class="admin-search-form">
+            <input type="text" name="q" placeholder="Search title, slug, level..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-outline">Search</button>
+          </form>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Duration</th>
+                <th>Level</th>
+                <th>Fee</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for course in courses %}
+                <tr>
+                  <td data-label="Title"><strong>{{ course.title }}</strong></td>
+                  <td data-label="Slug">{{ course.slug }}</td>
+                  <td data-label="Duration">{{ course.duration_weeks }} Weeks</td>
+                  <td data-label="Level">{{ course.level }}</td>
+                  <td data-label="Fee">{{ course.fee_symbol }}{{ course.fee_usd }}</td>
+                  <td data-label="Status">
+                    {% if course.is_active %}
+                      <span class="admin-badge status-active">Live</span>
+                    {% else %}
+                      <span class="admin-badge status-inactive">Off</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Created">{{ course.created_at|date:"Y-m-d H:i" }}</td>
+                  <td data-label="Actions">
+                    <div class="admin-actions">
+                      <a href="{% url 'admin_course_edit' course.id %}" class="btn btn-outline admin-mini-btn">Edit</a>
+                      <form method="post" action="{% url 'admin_course_toggle_live' course.id %}">
+                        {% csrf_token %}
+                        {% if course.is_active %}
+                          <button type="submit" class="btn admin-toggle-btn toggle-on">Turn Off</button>
+                        {% else %}
+                          <button type="submit" class="btn admin-toggle-btn toggle-off">Turn On</button>
+                        {% endif %}
+                      </form>
+                      <form method="post" action="{% url 'admin_course_delete' course.id %}" onsubmit="return confirm('Delete course {{ course.title }}?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn admin-danger-btn">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8">No courses found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

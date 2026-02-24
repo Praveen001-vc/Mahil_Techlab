@@ -1,23 +1,28 @@
 {% extends "core/base.html" %}
 
-{% block title %}Edit User | Mahil Techlab{% endblock %}
-{% block meta_description %}Edit user account details and permissions from admin access panel.{% endblock %}
+{% block title %}Edit Slider | Mahil Techlab{% endblock %}
+{% block meta_description %}Edit home slider content and image from admin access panel.{% endblock %}
 
 {% block content %}
 <section class="section reveal">
-  <div class="container admin-container">
+  <div class="container">
     <div class="section-head left">
       <p class="kicker">Admin Access</p>
-      <h1>Edit User: {{ target_user.username }}</h1>
-      <p class="lead">Update profile data, active status, and role permissions.</p>
+      <h1>Edit Slide: {{ target_slider.title }}</h1>
+      <p class="lead">Update slider text, image, order, and live status.</p>
     </div>
 
     <div class="admin-edit-wrap">
-      <form method="post" class="form-card admin-create-card" novalidate>
+      <form method="post" enctype="multipart/form-data" class="form-card" novalidate>
         {% csrf_token %}
 
         {% if edit_form.non_field_errors %}
           <p class="field-error">{{ edit_form.non_field_errors.0 }}</p>
+        {% endif %}
+
+        {% if target_slider.image %}
+          <p class="hint-text">Current image:</p>
+          <img src="{{ target_slider.image.url }}" alt="{{ target_slider.title }}" class="admin-slider-preview">
         {% endif %}
 
         {% for field in edit_form %}
@@ -36,7 +41,7 @@
 
         <div class="admin-edit-actions">
           <button type="submit" class="btn btn-solid">Save Changes</button>
-          <a href="{% url 'admin_dashboard' %}?panel=users" class="btn btn-outline">Back to Dashboard</a>
+          <a href="{% url 'admin_dashboard' %}?panel=sliders" class="btn btn-outline">Back to Dashboard</a>
         </div>
       </form>
     </div>

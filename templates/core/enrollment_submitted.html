@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+
+{% block title %}Enrollment Submitted | Mahil Techlab{% endblock %}
+{% block meta_description %}Your enrollment application was submitted successfully.{% endblock %}
+
+{% block content %}
+<section class="section reveal">
+  <div class="container">
+    <div class="section-head left">
+      <p class="kicker">Enrollment</p>
+      <h1>Application Submitted</h1>
+      <p class="lead">Your course application has been received. Our team will contact you soon.</p>
+    </div>
+
+    <div class="form-card" style="max-width: 760px;">
+      <h3>Application Details</h3>
+      <p><strong>Course:</strong> {{ enrollment.course.title }}</p>
+      <p><strong>Name:</strong> {{ enrollment.name }}</p>
+      <p><strong>Email:</strong> {{ enrollment.email }}</p>
+      <p><strong>Phone:</strong> {{ enrollment.phone|default:"-" }}</p>
+      <p><strong>Skill Level:</strong> {{ enrollment.experience }}</p>
+      <p><strong>Submitted:</strong> {{ enrollment.created_at|date:"Y-m-d H:i" }}</p>
+      <p><strong>Notes:</strong> {{ enrollment.notes|default:"-" }}</p>
+
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="{% url 'courses' %}">Back to Courses</a>
+        <a class="btn btn-outline" href="{% url 'home' %}">Go Home</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from .models import ContactMessage, Course, Enrollment, Project
+from .models import ContactMessage, Course, Enrollment, HomeSlider, Project
 
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("title", "level", "duration_weeks", "fee_usd", "is_active")
-    list_filter = ("level", "is_active")
+    list_display = ("title", "level", "duration_weeks", "fee_usd", "fee_currency", "is_active")
+    list_filter = ("level", "fee_currency", "is_active")
     search_fields = ("title", "description")
     prepopulated_fields = {"slug": ("title",)}
 
@@ -15,6 +15,14 @@ class CourseAdmin(admin.ModelAdmin):
 class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "company", "created_at")
     search_fields = ("name", "email", "company", "message")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(HomeSlider)
+class HomeSliderAdmin(admin.ModelAdmin):
+    list_display = ("title", "display_order", "is_active", "created_at")
+    list_filter = ("is_active",)
+    search_fields = ("title", "subtitle", "button_label", "button_url")
     readonly_fields = ("created_at",)
 
 

@@ -1,0 +1,9 @@
+Hello {{ contact_message.name }},
+
+Thank you for contacting Mahil Techlab.
+We received your message and our team will reach you shortly.
+
+Submitted email: {{ contact_message.email }}
+Submitted company: {{ contact_message.company|default:"-" }}
+
+This is an automated acknowledgement from {{ site_host }}.

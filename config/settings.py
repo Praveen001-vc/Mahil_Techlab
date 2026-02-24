@@ -147,6 +147,9 @@ SITE_ID = int(os.getenv("SITE_ID", "1"))
 LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/")
 LOGOUT_REDIRECT_URL = os.getenv("LOGOUT_REDIRECT_URL", "/")
 
+MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
+LOGIN_LOCKOUT_SECONDS = int(os.getenv("LOGIN_LOCKOUT_SECONDS", "900"))
+
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -164,6 +167,29 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         "secret": GOOGLE_CLIENT_SECRET,
         "key": "",
     }
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com").strip()
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "").strip()
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "").strip()
+DEFAULT_FROM_EMAIL = (
+    os.getenv("DEFAULT_FROM_EMAIL")
+    or EMAIL_HOST_USER
+    or "no-reply@mahil-techlab.local"
+).strip()
+SERVER_EMAIL = (os.getenv("SERVER_EMAIL") or DEFAULT_FROM_EMAIL).strip()
+CONTACT_RECEIVER_EMAIL = (os.getenv("CONTACT_RECEIVER_EMAIL") or DEFAULT_FROM_EMAIL).strip()
+ENROLLMENT_RECEIVER_EMAIL = (
+    os.getenv("ENROLLMENT_RECEIVER_EMAIL") or CONTACT_RECEIVER_EMAIL
+).strip()
 
 DEFAULT_POS_INSTALLER_PATH = (
     Path.home()
@@ -191,6 +217,27 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+SECURE_CONTENT_TYPE_NOSNIFF = env_bool("SECURE_CONTENT_TYPE_NOSNIFF", True)
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY").strip() or "DENY"
+SECURE_REFERRER_POLICY = (
+    os.getenv("SECURE_REFERRER_POLICY", "strict-origin-when-cross-origin").strip()
+    or "strict-origin-when-cross-origin"
+)
+SECURE_CROSS_ORIGIN_OPENER_POLICY = (
+    os.getenv("SECURE_CROSS_ORIGIN_OPENER_POLICY", "same-origin").strip()
+    or "same-origin"
+)
+SECURE_CROSS_ORIGIN_RESOURCE_POLICY = (
+    os.getenv("SECURE_CROSS_ORIGIN_RESOURCE_POLICY", "same-origin").strip()
+    or "same-origin"
+)
+SESSION_COOKIE_HTTPONLY = env_bool("SESSION_COOKIE_HTTPONLY", True)
+CSRF_COOKIE_HTTPONLY = env_bool("CSRF_COOKIE_HTTPONLY", True)
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax").strip() or "Lax"
+CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "Lax").strip() or "Lax"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

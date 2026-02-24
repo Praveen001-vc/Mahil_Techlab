@@ -1,116 +1,128 @@
 # Mahil Techlab - Full Project Documentation
 
-Last updated: February 21, 2026
+Last updated: February 24, 2026
 
 ## 1) Project Overview
 
-Mahil Techlab is a Django + PostgreSQL web application for:
+Mahil Techlab is a Django + PostgreSQL web platform that combines:
 
-- IT services company presentation
-- IT course listing and enrollment
-- User authentication with username/password and Google login
-- Project portfolio pages with details and installer actions
-- Superuser user-management panel (add/edit/delete users)
-- Download gateway for MahilMart POS installer (login required)
+- Company website pages
+- IT course catalog + enrollment
+- Projects portfolio with install actions
+- Contact form + email notification workflow
+- Unified superuser admin dashboard
 
-The app is responsive and works across mobile, tablet, laptop, and large screens.
+The application is responsive and includes premium home-page slider UX with autoplay, swipe support, smooth transitions, and admin-controlled slider content from database uploads.
 
 ## 2) Technology Stack
 
 - Backend: Django 5.2.4
-- Database: PostgreSQL
-- Authentication: Django auth + django-allauth (Google OAuth)
-- Static files in production: WhiteNoise
+- Database: PostgreSQL (or `DATABASE_URL`)
+- Auth: Django auth + `django-allauth` (Google)
+- Images/uploads: Pillow (`ImageField`)
+- Static serving (prod): WhiteNoise
 - WSGI server: Gunicorn
-- Deployment options: Render / Docker / VPS
+- Deployment options: Render, Docker, VPS
 
-Python dependencies are in `requirements.txt`.
+Main dependencies are listed in `requirements.txt`.
 
 ## 3) Repository Structure
 
-- `config/` - Django project settings and root URLs
-- `core/` - Main app (models, views, forms, URLs, admin, commands)
-- `templates/` - HTML templates
-- `static/` - CSS and JavaScript
-- `Dockerfile`, `docker-compose.yml`, `entrypoint.sh` - container deployment
-- `render.yaml` - Render blueprint deployment
-- `docs/FULL_DOCUMENTATION.md` - this document
+- `config/` - Django project configuration (`settings.py`, root URLs)
+- `core/` - Main app (models, forms, views, admin, URLs, seed commands, migrations)
+- `templates/` - HTML templates for website, admin dashboard, and emails
+- `static/` - CSS, JavaScript, assets
+- `media/` - Runtime uploaded files (home slider images)
+- `docs/FULL_DOCUMENTATION.md` - this file
 
-## 4) Functional Modules
+## 4) Implemented Modules
 
-### 4.1 Public Website Pages
+### 4.1 Public Website
 
-- Home page
-- Projects listing and project detail pages
-- Courses page
+- Home page with dynamic DB slider + featured projects/courses
+- Projects list and project detail pages
+- Courses page with login-protected enrollment form
 - Contact page
+- Health endpoint (`/healthz/`)
 
 ### 4.2 Authentication
 
-- Register page
-- Login page
-- Logout
-- Google OAuth login via `django-allauth`
-- Password visibility toggle in auth forms
+- User registration
+- Login/logout
+- Google OAuth login (if configured)
+- Session-based login lockout after repeated failed attempts
 
-### 4.3 Courses and Enrollment
+### 4.3 Contact + Email Notifications
 
-- Courses are publicly visible
-- Enrollment submission requires login
-- Enrollment records are linked to logged-in user
+- Contact submissions are saved in database
+- Admin inbox is available in dashboard
+- Premium HTML + text email notification sent to configured inbox
+- Email includes deep link to focused message in admin dashboard
+- If user is logged out, login is required before viewing admin message page
 
-### 4.4 Projects Portfolio
+### 4.4 Unified Admin Dashboard
 
-- Project card includes name, icon, short description, version, and actions
-- Project detail page includes full details text
-- Install button behavior:
-- Logged-in users can get install link
-- Logged-out users see "Login to Install"
+Single-page dashboard with tabs:
 
-### 4.5 Installer Download Gateway
+- Messages
+- Enrollments
+- Home Slider
+- Courses
+- Users
+
+Supports create/search/manage workflows in one screen, plus separate edit pages.
+
+### 4.5 Home Slider CMS
+
+- Slider items managed from admin dashboard and Django admin
+- Upload image, set title/subtitle/button, display order, live toggle
+- Home page loads only active slider items
+- Premium slider behavior includes autoplay, smooth horizontal transitions, infinite loop, dot/arrow controls, touch swipe navigation, progress bar, and pause on hover/focus.
+
+### 4.6 Courses + Currency
+
+- Courses support two fee currencies: `USD` (Dollar) and `INR` (Rupee)
+- Dynamic symbol display in templates via model property
+
+### 4.7 POS Installer Download Gateway
 
 - Route: `/downloads/mahilmart-pos/setup/`
-- Access rule: authenticated users only
-- Download behavior:
-- If `POS_INSTALLER_URL` exists, redirect to that URL
-- Else stream local file from `POS_INSTALLER_PATH`
+- Requires login
+- Behavior: redirect to `POS_INSTALLER_URL` when present, else stream local file from `POS_INSTALLER_PATH`
 
-### 4.6 Superuser User Management
+## 5) URL Reference
 
-- Route: `/admin-access/users/`
-- Features:
-- List/search users
-- Add user
-- Edit user
-- Delete user
-- Safety checks:
-- Cannot delete own logged-in account
-- Cannot remove the last superuser
+| Path | Name | Access | Purpose |
+|---|---|---|---|
+| `/` | `home` | Public | Home page with DB slider |
+| `/healthz/` | `healthz` | Public | Health check JSON |
+| `/projects/` | `projects` | Public | Projects listing |
+| `/projects/<slug>/` | `project_detail` | Public | Project detail |
+| `/courses/` | `courses` | Public + Auth for submit | Course listing and enrollment |
+| `/courses/enrollment-submitted/` | `enrollment_submitted` | Auth | Enrollment success details page |
+| `/contact/` | `contact` | Public | Contact form |
+| `/register/` | `register` | Public | User registration |
+| `/login/` | `login` | Public | Login |
+| `/logout/` | `logout` | Auth POST | Logout |
+| `/downloads/mahilmart-pos/setup/` | `download_pos_installer` | Auth | Installer download/redirect |
+| `/admin-access/dashboard/` | `admin_dashboard` | Superuser | Unified admin dashboard |
+| `/admin-access/messages/` | `admin_contact_messages` | Superuser | Redirect helper to dashboard messages tab |
+| `/admin-access/enrollments/` | `admin_enrollments` | Superuser | Redirect helper to dashboard enrollments tab |
+| `/admin-access/users/` | `admin_users` | Superuser | Redirect helper to dashboard users tab |
+| `/admin-access/users/<id>/edit/` | `admin_user_edit` | Superuser | Edit user |
+| `/admin-access/users/<id>/delete/` | `admin_user_delete` | Superuser POST | Delete user |
+| `/admin-access/courses/` | `admin_courses` | Superuser | Redirect helper to dashboard courses tab |
+| `/admin-access/courses/<id>/edit/` | `admin_course_edit` | Superuser | Edit course |
+| `/admin-access/courses/<id>/delete/` | `admin_course_delete` | Superuser POST | Delete course |
+| `/admin-access/courses/<id>/toggle-live/` | `admin_course_toggle_live` | Superuser POST | Course live on/off |
+| `/admin-access/sliders/` | `admin_sliders` | Superuser | Redirect helper to dashboard sliders tab |
+| `/admin-access/sliders/<id>/edit/` | `admin_slider_edit` | Superuser | Edit slide |
+| `/admin-access/sliders/<id>/delete/` | `admin_slider_delete` | Superuser POST | Delete slide |
+| `/admin-access/sliders/<id>/toggle-live/` | `admin_slider_toggle_live` | Superuser POST | Slide live on/off |
+| `/admin/` | Django admin | Superuser/staff | Model admin |
+| `/accounts/*` | allauth | Public | Google/social auth routes |
 
-## 5) URL Map
-
-### 5.1 Core Routes
-
-- `/` -> Home
-- `/projects/` -> Projects list
-- `/projects/<slug>/` -> Project detail
-- `/courses/` -> Courses + enrollment form
-- `/contact/` -> Contact form
-- `/register/` -> Register
-- `/login/` -> Login
-- `/logout/` -> Logout
-- `/downloads/mahilmart-pos/setup/` -> Installer download (login required)
-- `/admin-access/users/` -> Superuser user manager
-- `/admin-access/users/<id>/edit/` -> Edit user
-- `/admin-access/users/<id>/delete/` -> Delete user
-- `/healthz/` -> Health check
-
-### 5.2 Built-in/Admin Routes
-
-- `/admin/` -> Django admin
-- `/accounts/*` -> allauth routes (Google login and social account pages)
-
-## 6) Data Model Reference
+## 6) Data Models
 
 ### 6.1 `Course`
 
@@ -118,12 +130,28 @@ Python dependencies are in `requirements.txt`.
 - `slug` (unique)
 - `description`
 - `duration_weeks`
-- `level` (Beginner/Intermediate/Advanced)
-- `fee_usd`
+- `level` (`Beginner`, `Intermediate`, `Advanced`)
+- `fee_usd` (decimal amount field)
+- `fee_currency` (`USD`, `INR`)
 - `is_active`
 - `created_at`
 
-### 6.2 `ContactMessage`
+Extra property:
+
+- `fee_symbol` returns `$` for USD and rupee symbol for INR
+
+### 6.2 `HomeSlider`
+
+- `title`
+- `subtitle`
+- `image` (`upload_to="home_slides/"`)
+- `button_label`
+- `button_url`
+- `display_order`
+- `is_active`
+- `created_at`
+
+### 6.3 `ContactMessage`
 
 - `name`
 - `email`
@@ -131,18 +159,18 @@ Python dependencies are in `requirements.txt`.
 - `message`
 - `created_at`
 
-### 6.3 `Enrollment`
+### 6.4 `Enrollment`
 
 - `name`
 - `email`
 - `phone`
-- `user` (FK to auth user, nullable)
-- `course` (FK to Course)
-- `experience`
+- `user` (optional FK to auth user)
+- `course` (FK to `Course`, protected)
+- `experience` (`Beginner`, `Intermediate`, `Advanced`)
 - `notes`
 - `created_at`
 
-### 6.4 `Project`
+### 6.5 `Project`
 
 - `name` (unique)
 - `slug` (unique)
@@ -156,9 +184,137 @@ Python dependencies are in `requirements.txt`.
 - `display_order`
 - `created_at`
 
-## 7) Environment Variables
+## 7) Migration Notes
 
-### 7.1 Core
+Applied core migration sequence:
+
+- `0001_initial` - base models
+- `0002_enrollment_user` - optional user link on enrollments
+- `0003_project` - projects portfolio model
+- `0004_course_fee_currency` - `fee_currency` support (`USD`/`INR`)
+- `0005_homeslider` - home slider model with image uploads
+
+## 8) Forms
+
+- `ContactForm` - public contact form
+- `EnrollmentForm` - enrollment form; only active courses selectable
+- `AdminCourseForm` - create/edit courses with slug normalization + uniqueness validation
+- `AdminSliderForm` - create/edit slider entries
+- `SignUpForm` - registration with unique email check
+- `AdminUserCreateForm` - superuser creates users with role flags
+- `AdminUserEditForm` - superuser edits users with last-superuser protection
+
+## 9) Admin Dashboard Behavior
+
+Dashboard URL:
+
+- `/admin-access/dashboard/`
+
+Panels:
+
+- `messages` (default)
+- `enrollments`
+- `sliders`
+- `courses`
+- `users`
+
+Search query params:
+
+- `messages_q`
+- `enrollments_q`
+- `sliders_q`
+- `courses_q`
+- `users_q`
+
+Focused message deep-link:
+
+- `?panel=messages&message=<id>`
+
+POST form handlers by `form_type`:
+
+- `create_course`
+- `create_user`
+- `create_slider`
+
+Safety controls:
+
+- Superuser guard on all admin-access views
+- Cannot delete own currently logged-in user
+- Cannot remove/delete last remaining superuser
+
+## 10) Contact Email Notification Flow
+
+When contact form is submitted:
+
+1. Save message to `ContactMessage`.
+2. If `CONTACT_RECEIVER_EMAIL` exists, render:
+   - `templates/core/emails/contact_notification.txt`
+   - `templates/core/emails/contact_notification.html`
+3. Send email using `EmailMultiAlternatives`:
+   - `to`: `CONTACT_RECEIVER_EMAIL`
+   - `reply_to`: sender email from contact form
+4. Email contains:
+   - Sender details
+   - Submitted timestamp
+   - Message body
+   - Direct dashboard links (all messages and focused single message)
+
+If email fails to send, message is still saved and user receives warning flash message.
+
+## 11) Frontend UX Notes
+
+### 11.1 Home Slider UX
+
+- Edge-to-edge full-width slider section
+- Desktop slider height is reduced to `50vh`
+- Mobile keeps separate responsive height rules
+- Auto smooth slide transitions
+- Touch swipe controls for mobile/tablet
+- Dot and arrow controls
+- Auto-play progress bar
+- Reduced motion fallback support
+
+### 11.2 Global Smooth Scroll
+
+- Smooth anchor scrolling is enabled
+- JS helper also supports in-page anchor links
+
+### 11.3 Flash Messages (Login/Logout and others)
+
+- Messages are shown as fixed slide-in notification bar
+- No page layout space is consumed
+- Auto-hide after about 4 seconds
+
+## 12) Static and Media Files
+
+- Static URL: `/static/`
+- Static directories: `static/` and `staticfiles/` (collectstatic output)
+- Media URL: `/media/`
+- Media root: `media/`
+- Development media serving is enabled when `DEBUG=True`.
+
+Important:
+
+- Slider image uploads require Pillow.
+
+## 13) Security Controls
+
+Implemented hardening includes:
+
+- Configurable lockout: `MAX_LOGIN_ATTEMPTS`, `LOGIN_LOCKOUT_SECONDS`
+- Cookie hardening: `SESSION_COOKIE_HTTPONLY`, `CSRF_COOKIE_HTTPONLY`, `SESSION_COOKIE_SAMESITE`, `CSRF_COOKIE_SAMESITE`
+- Browser policy headers: `SECURE_CONTENT_TYPE_NOSNIFF`, `X_FRAME_OPTIONS`, `SECURE_REFERRER_POLICY`, `SECURE_CROSS_ORIGIN_OPENER_POLICY`, `SECURE_CROSS_ORIGIN_RESOURCE_POLICY`
+- Production TLS security (`DEBUG=False`): `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS settings
+
+Operational security notes:
+
+- Never store credentials in repository or documentation.
+- Rotate any secret immediately if exposed.
+- Frontend code is visible in every browser by design. Keep secrets on backend only.
+
+## 14) Environment Variables
+
+### 14.1 Core App
 
 - `SECRET_KEY`
 - `DEBUG`
@@ -167,41 +323,72 @@ Python dependencies are in `requirements.txt`.
 - `LOGIN_REDIRECT_URL`
 - `LOGOUT_REDIRECT_URL`
 
-### 7.2 Host and CSRF
+### 14.2 Host and CSRF
 
 - `ALLOW_ALL_HOSTS`
 - `ALLOWED_HOSTS`
 - `CSRF_TRUSTED_ORIGINS`
 
-Notes:
+### 14.3 Database
 
-- If `ALLOW_ALL_HOSTS=True`, Django sets `ALLOWED_HOSTS=["*"]`.
-- For production, use specific hostnames and trusted origins.
-
-### 7.3 Database
-
-- Preferred: `DATABASE_URL`
-- Or manual:
+- `DATABASE_URL` (preferred in production)
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
 
-### 7.4 Google OAuth
+### 14.4 Authentication Security
+
+- `MAX_LOGIN_ATTEMPTS`
+- `LOGIN_LOCKOUT_SECONDS`
+
+### 14.5 Google OAuth
 
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-### 7.5 Installer Integration
+### 14.6 Email
+
+- `EMAIL_BACKEND`
+- `EMAIL_HOST`
+- `EMAIL_PORT`
+- `EMAIL_USE_TLS`
+- `EMAIL_USE_SSL`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+- `DEFAULT_FROM_EMAIL`
+- `SERVER_EMAIL`
+- `CONTACT_RECEIVER_EMAIL`
+- `ENROLLMENT_RECEIVER_EMAIL`
+
+### 14.7 POS Installer
 
 - `POS_INSTALLER_PATH`
 - `POS_INSTALLER_URL`
 - `POS_INSTALLER_FILENAME`
 
-## 8) Local Setup (Windows / PowerShell)
+### 14.8 HTTP and Cookie Security
 
-1. Create and activate virtual environment.
+- `SECURE_CONTENT_TYPE_NOSNIFF`
+- `X_FRAME_OPTIONS`
+- `SECURE_REFERRER_POLICY`
+- `SECURE_CROSS_ORIGIN_OPENER_POLICY`
+- `SECURE_CROSS_ORIGIN_RESOURCE_POLICY`
+- `SECURE_SSL_REDIRECT`
+- `SESSION_COOKIE_SECURE`
+- `CSRF_COOKIE_SECURE`
+- `SESSION_COOKIE_HTTPONLY`
+- `CSRF_COOKIE_HTTPONLY`
+- `SESSION_COOKIE_SAMESITE`
+- `CSRF_COOKIE_SAMESITE`
+- `SECURE_HSTS_SECONDS`
+- `SECURE_HSTS_INCLUDE_SUBDOMAINS`
+- `SECURE_HSTS_PRELOAD`
+
+## 15) Local Setup (Windows PowerShell)
+
+1. Create virtual environment.
 
 ```powershell
 python -m venv .venv
@@ -214,13 +401,13 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-3. Copy env template and edit.
+3. Create `.env`.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-4. Run migrations.
+4. Apply migrations.
 
 ```powershell
 python manage.py migrate
@@ -239,183 +426,84 @@ python manage.py seed_projects
 python manage.py createsuperuser
 ```
 
-7. Start server.
+7. Run app.
 
 ```powershell
 python manage.py runserver 0.0.0.0:8000
 ```
 
-## 9) PostgreSQL Setup Notes
-
-Default DB name used in project:
-
-- `mahil_techlab`
-
-If manual DB creation is required:
-
-```sql
-CREATE DATABASE mahil_techlab;
-```
-
-Then update `.env` with the correct PostgreSQL credentials.
-
-## 10) Google OAuth Configuration (Important)
+## 16) Google OAuth Setup
 
 In Google Cloud Console:
 
-1. Create OAuth client (Web application).
-2. Add Authorized JavaScript Origins:
+1. Create OAuth Client ID (Web application).
+2. Add JavaScript origins:
 - `http://127.0.0.1:8000`
 - `http://localhost:8000`
-- `https://<your-production-domain>`
-3. Add Authorized Redirect URIs:
+- `https://<your-domain>`
+3. Add redirect URIs:
 - `http://127.0.0.1:8000/accounts/google/login/callback/`
 - `http://localhost:8000/accounts/google/login/callback/`
-- `https://<your-production-domain>/accounts/google/login/callback/`
-4. Put client id/secret into `.env`.
+- `https://<your-domain>/accounts/google/login/callback/`
+4. Put client values in `.env`.
 
-Common mistakes:
+## 17) Deployment
 
-- Origins must not include path. Example invalid origin: `http://127.0.0.1:8000/accounts/...`
-- If you see `Error 403: org_internal`, your OAuth app is restricted to organization users. Change audience/test users in Google OAuth consent settings.
+### 17.1 Render
 
-## 11) Installer Integration (MahilMart POS)
+- Use `render.yaml`.
+- Configure required env vars.
+- Set `DEBUG=False`.
+- Run `python manage.py createsuperuser` after first deploy.
 
-Two supported approaches:
-
-- Local file download through this Django app:
-- Set `POS_INSTALLER_PATH` to local `.exe`
-- Hosted installer link:
-- Set `POS_INSTALLER_URL` to external URL (GitHub Releases/CDN)
-
-Current installer route:
-
-- `/downloads/mahilmart-pos/setup/`
-- Requires login
-
-If installer file is missing, user gets a flash error and returns to home.
-
-## 12) Deployments
-
-### 12.1 Render
-
-- Use `render.yaml`
-- Required env vars:
-- `SECRET_KEY`
-- `DEBUG=False`
-- `DATABASE_URL` (from Render DB)
-- `ALLOWED_HOSTS`
-- `CSRF_TRUSTED_ORIGINS`
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-
-After deploy:
-
-- Run `python manage.py createsuperuser` in shell
-
-### 12.2 Docker Compose
+### 17.2 Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-Services:
-
-- `db` -> PostgreSQL
-- `web` -> Django + Gunicorn
-
-Entry point runs:
+Entry point performs:
 
 - `migrate`
 - `collectstatic`
 - optional `seed_courses` when `SEED_COURSES=1`
 
-## 13) Admin Operation Guide
+## 18) Troubleshooting
 
-### 13.1 Django Admin
+### 18.1 Google login not showing/enabled
 
-Use `/admin/` for model-level CRUD:
+- Confirm `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+- Confirm redirect URI and origin configuration.
+- Confirm social app config if env-based app config is not used.
 
-- Courses
-- Contacts
-- Enrollments
-- Projects
+### 18.2 Contact email not delivered
 
-### 13.2 Custom Superuser Page
+- Verify SMTP variables (`EMAIL_HOST`, `EMAIL_PORT`, TLS/SSL, user/password).
+- Verify `CONTACT_RECEIVER_EMAIL`.
+- Check server logs for SMTP exception.
 
-Use `/admin-access/users/` for user operations with custom UI.
+### 18.3 Installer not downloading
 
-### 13.3 Create Project Detail Pages (Admin Steps)
+- Confirm user is logged in.
+- Confirm `POS_INSTALLER_URL` or valid `POS_INSTALLER_PATH`.
+- Confirm local installer file exists and is readable.
 
-1. Open `/admin/` and login as superuser.
-2. Go to `Core -> Projects`.
-3. Click `Add Project`.
-4. Fill required fields:
-- `name`
-- `slug`
-- `short_description`
-5. Fill optional fields for richer detail page:
-- `icon_url`
-- `tagline`
-- `details`
-- `version`
-- `install_url` (optional external installer URL)
-6. Set `is_active=True` and choose `display_order`.
-7. Save.
-8. Open `/projects/` and `/projects/<slug>/` to verify.
+### 18.4 Locked out on login
 
-## 14) Security Notes
+- Wait for configured lockout window.
+- Adjust `MAX_LOGIN_ATTEMPTS` and `LOGIN_LOCKOUT_SECONDS` in `.env`.
 
-- Set `DEBUG=False` in production.
-- Use strong `SECRET_KEY`.
-- Use specific hosts in `ALLOWED_HOSTS` and origins in `CSRF_TRUSTED_ORIGINS`.
-- Keep cookies secure in production (`SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`).
-- Do not commit real secrets to git.
-- Use signed installer for Windows distribution to reduce SmartScreen warnings.
+### 18.5 Media images not loading in development
 
-## 15) Troubleshooting
+- Ensure `DEBUG=True`.
+- Ensure image files exist under `media/`.
+- Ensure migration for `HomeSlider` is applied.
 
-### 15.1 `ModuleNotFoundError: No module named 'jwt'`
-
-Cause: `PyJWT` not installed.
-Fix:
-
-```powershell
-pip install "PyJWT[crypto]"
-```
-
-### 15.2 `ValueError ... multiple authentication backends configured`
-
-Cause: logging in a new user without specifying backend.
-Status: already fixed in `register_user` by explicitly using `ModelBackend`.
-
-### 15.3 Google login shows "not configured yet"
-
-Cause: missing `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` or missing SocialApp setup.
-Fix: set env variables and restart server.
-
-### 15.4 Google `org_internal` 403
-
-Cause: OAuth app restricted to internal organization users.
-Fix: adjust OAuth consent audience/test users in Google Cloud.
-
-### 15.5 Installer download not working
-
-Checks:
-
-- Confirm user is logged in
-- Confirm `POS_INSTALLER_URL` or valid `POS_INSTALLER_PATH`
-- Confirm file exists at configured path
-
-### 15.6 Browser warns installer is unsafe
-
-Cause: unsigned/new executable reputation.
-Fix: sign `.exe` and setup with code-signing certificate + timestamp.
-
-## 16) Useful Commands
+## 19) Useful Commands
 
 ```powershell
 python manage.py check
+python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py seed_courses
@@ -423,13 +511,16 @@ python manage.py seed_projects
 python manage.py collectstatic --noinput
 ```
 
-## 17) Go-Live Checklist
+## 20) Go-Live Checklist
 
-- Set production env variables
-- Set exact allowed hosts and CSRF origins
-- Configure Google OAuth production URLs
-- Create superuser
-- Validate installer settings
-- Validate login/register/enrollment/project flows
-- Run `python manage.py check`
-- Verify `/healthz/` returns success
+- Set `DEBUG=False`.
+- Set strong `SECRET_KEY`.
+- Configure strict `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
+- Configure HTTPS/TLS and secure cookie settings.
+- Configure SMTP + `CONTACT_RECEIVER_EMAIL`.
+- Configure Google OAuth production callback.
+- Verify admin superuser exists.
+- Verify contact email with dashboard deep links.
+- Verify slider create/edit/toggle/delete workflow.
+- Verify login/register/logout flow and flash notifications.
+- Verify `python manage.py check` and `/healthz/`.

@@ -8,6 +8,10 @@ class Course(models.Model):
         ("Intermediate", "Intermediate"),
         ("Advanced", "Advanced"),
     )
+    CURRENCY_CHOICES = (
+        ("USD", "Dollar (USD)"),
+        ("INR", "Rupee (INR)"),
+    )
 
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=220, unique=True)
@@ -15,11 +19,33 @@ class Course(models.Model):
     duration_weeks = models.PositiveSmallIntegerField()
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES)
     fee_usd = models.DecimalField(max_digits=8, decimal_places=2)
+    fee_currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default="USD")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["title"]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def fee_symbol(self):
+        return "\u20B9" if self.fee_currency == "INR" else "$"
+
+
+class HomeSlider(models.Model):
+    title = models.CharField(max_length=180)
+    subtitle = models.CharField(max_length=260, blank=True)
+    image = models.ImageField(upload_to="home_slides/")
+    button_label = models.CharField(max_length=60, blank=True)
+    button_url = models.CharField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["display_order", "-created_at"]
 
     def __str__(self):
         return self.title
