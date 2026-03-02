@@ -27,6 +27,9 @@
       {% endif %}
 
       <div class="hero-actions">
+        {% if project.github_url %}
+          <a class="btn btn-light" href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        {% endif %}
         {% if install_link %}
           <a class="btn btn-solid" href="{{ install_link }}">Install {{ project.name }}</a>
         {% elif not user.is_authenticated %}

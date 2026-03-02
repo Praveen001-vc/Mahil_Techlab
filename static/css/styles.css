@@ -727,7 +727,12 @@ a {
 .form-card input,
 .form-card select,
 .form-card textarea {
+  display: block;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
   width: 100%;
+  min-height: 44px;
   padding: 0.68rem 0.78rem;
   border-radius: 12px;
   border: 1px solid var(--line);
@@ -735,6 +740,10 @@ a {
   color: var(--ink);
   font-family: "Work Sans", "Segoe UI", sans-serif;
   margin-bottom: 0.3rem;
+}
+
+.form-card textarea {
+  min-height: 110px;
 }
 
 .form-card input[type="checkbox"],

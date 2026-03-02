@@ -101,6 +101,7 @@ class Project(models.Model):
     tagline = models.CharField(max_length=220, blank=True)
     short_description = models.TextField()
     details = models.TextField(blank=True)
+    github_url = models.URLField(blank=True)
     install_url = models.URLField(blank=True)
     version = models.CharField(max_length=40, blank=True)
     is_active = models.BooleanField(default=True)

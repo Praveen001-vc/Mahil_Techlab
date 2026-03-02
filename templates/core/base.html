@@ -26,6 +26,9 @@
         <a href="{% url 'courses' %}" class="{% if request.resolver_match.url_name == 'courses' %}active{% endif %}">Courses</a>
         <a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
         {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="{% url 'attendance_portal' %}" class="{% if request.resolver_match.url_name == 'attendance_portal' %}active{% endif %}">Attendance</a>
+          {% endif %}
           {% if user.is_superuser %}
             <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'admin_contact_messages' or request.resolver_match.url_name == 'admin_enrollments' or request.resolver_match.url_name == 'admin_courses' or request.resolver_match.url_name == 'admin_course_edit' or request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_edit' or request.resolver_match.url_name == 'admin_sliders' or request.resolver_match.url_name == 'admin_slider_edit' %}active{% endif %}">Admin Dashboard</a>
           {% endif %}

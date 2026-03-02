@@ -38,6 +38,6 @@ class EnrollmentAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "version", "is_active", "display_order", "created_at")
     list_filter = ("is_active",)
-    search_fields = ("name", "slug", "tagline", "short_description", "details")
+    search_fields = ("name", "slug", "tagline", "short_description", "details", "github_url")
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at",)

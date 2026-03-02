@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("healthz/", views.healthz, name="healthz"),
     path("downloads/mahilmart-pos/setup/", views.download_pos_installer, name="download_pos_installer"),
+    path("attendance/", views.attendance_portal, name="attendance_portal"),
     path("", views.home, name="home"),
     path("projects/", views.projects, name="projects"),
     path("projects/<slug:slug>/", views.project_detail, name="project_detail"),

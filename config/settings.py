@@ -191,6 +191,8 @@ ENROLLMENT_RECEIVER_EMAIL = (
     os.getenv("ENROLLMENT_RECEIVER_EMAIL") or CONTACT_RECEIVER_EMAIL
 ).strip()
 
+ATTENDANCE_URL = (os.getenv("ATTENDANCE_URL") or "http://192.168.0.105:8002/").strip()
+
 DEFAULT_POS_INSTALLER_PATH = (
     Path.home()
     / "Documents"

@@ -21,8 +21,9 @@ class ContactForm(forms.ModelForm):
 class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
-        fields = ["email", "phone", "course", "experience", "notes"]
+        fields = ["name", "email", "phone", "course", "experience", "notes"]
         widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "Your full name"}),
             "email": forms.EmailInput(attrs={"placeholder": "you@example.com"}),
             "phone": forms.TextInput(attrs={"placeholder": "+1 ..."}),
             "notes": forms.Textarea(attrs={"rows": 4, "placeholder": "Optional details"}),

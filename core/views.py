@@ -285,6 +285,8 @@ def project_detail(request, slug):
 def courses(request):
     course_qs = Course.objects.filter(is_active=True).order_by("title")
     initial = {}
+    if request.user.is_authenticated:
+        initial["name"] = request.user.get_full_name().strip() or request.user.username
     if request.user.is_authenticated and request.user.email:
         initial["email"] = request.user.email
     preselect_slug = request.GET.get("course")
@@ -293,88 +295,85 @@ def courses(request):
         if preselected_course:
             initial["course"] = preselected_course
 
-    if request.method == "POST" and not request.user.is_authenticated:
-        messages.info(request, "Please register and log in to apply for a course.")
-        return redirect(f"{reverse('register')}?next={quote(request.get_full_path())}")
+    if request.method == "POST":
+        form = EnrollmentForm(request.POST)
+        if form.is_valid():
+            enrollment = form.save(commit=False)
+            enrollment.user = request.user if request.user.is_authenticated else None
+            enrollment.name = form.cleaned_data["name"].strip()
+            enrollment.email = form.cleaned_data["email"].strip().lower()
+            enrollment.save()
 
-    can_apply = request.user.is_authenticated
+            admin_alert_failed = False
+            admin_alert_skipped = False
+            acknowledgement_failed = False
+            acknowledgement_skipped = False
+            try:
+                admin_alert_sent = _send_enrollment_notification_email(request, enrollment)
+                if not admin_alert_sent:
+                    admin_alert_skipped = True
+            except Exception:
+                admin_alert_failed = True
+                logger.exception("Enrollment saved, but email delivery failed.")
+            try:
+                acknowledgement_sent = _send_enrollment_acknowledgement_email(request, enrollment)
+                if not acknowledgement_sent:
+                    acknowledgement_skipped = True
+            except Exception:
+                acknowledgement_failed = True
+                logger.exception("Enrollment saved, but acknowledgement email delivery failed.")
 
-    if can_apply:
-        if request.method == "POST":
-            form = EnrollmentForm(request.POST)
-            if form.is_valid():
-                enrollment = form.save(commit=False)
-                enrollment.user = request.user
-                enrollment.name = request.user.get_full_name().strip() or request.user.username
-                enrollment.email = form.cleaned_data["email"].strip().lower()
-                enrollment.save()
+            if admin_alert_skipped:
+                messages.warning(
+                    request,
+                    "Enrollment submitted, but enrollment alert recipient email is not configured correctly.",
+                )
+            if admin_alert_failed:
+                messages.warning(
+                    request,
+                    "Enrollment submitted, but internal alert email delivery failed.",
+                )
+            if acknowledgement_skipped:
+                messages.warning(
+                    request,
+                    "Enrollment submitted, but confirmation email address is invalid.",
+                )
+            if acknowledgement_failed:
+                messages.warning(
+                    request,
+                    "Enrollment submitted, but confirmation email could not be delivered to you.",
+                )
 
-                admin_alert_failed = False
-                admin_alert_skipped = False
-                acknowledgement_failed = False
-                acknowledgement_skipped = False
-                try:
-                    admin_alert_sent = _send_enrollment_notification_email(request, enrollment)
-                    if not admin_alert_sent:
-                        admin_alert_skipped = True
-                except Exception:
-                    admin_alert_failed = True
-                    logger.exception("Enrollment saved, but email delivery failed.")
-                try:
-                    acknowledgement_sent = _send_enrollment_acknowledgement_email(request, enrollment)
-                    if not acknowledgement_sent:
-                        acknowledgement_skipped = True
-                except Exception:
-                    acknowledgement_failed = True
-                    logger.exception("Enrollment saved, but acknowledgement email delivery failed.")
-
-                if admin_alert_skipped:
-                    messages.warning(
-                        request,
-                        "Enrollment submitted, but enrollment alert recipient email is not configured correctly.",
-                    )
-                if admin_alert_failed:
-                    messages.warning(
-                        request,
-                        "Enrollment submitted, but internal alert email delivery failed.",
-                    )
-                if acknowledgement_skipped:
-                    messages.warning(
-                        request,
-                        "Enrollment submitted, but confirmation email address is invalid.",
-                    )
-                if acknowledgement_failed:
-                    messages.warning(
-                        request,
-                        "Enrollment submitted, but confirmation email could not be delivered to you.",
-                    )
-
-                messages.success(request, "Enrollment request submitted successfully.")
+            messages.success(request, "Enrollment request submitted successfully.")
+            if request.user.is_authenticated:
                 return redirect(f"{reverse('enrollment_submitted')}?id={enrollment.id}")
-            messages.error(request, "Please correct the form errors and submit again.")
-        else:
-            form = EnrollmentForm(initial=initial)
+            request.session["guest_enrollment_id"] = enrollment.id
+            return redirect(f"{reverse('enrollment_submitted')}?id={enrollment.id}")
+        messages.error(request, "Please correct the form errors and submit again.")
     else:
-        form = None
+        form = EnrollmentForm(initial=initial)
 
     context = {"courses": course_qs, "enrollment_form": form}
     return render(request, "core/courses.html", context)
 
 
 def enrollment_submitted(request):
-    if not request.user.is_authenticated:
-        return redirect(f"{reverse('login')}?next={quote(request.get_full_path())}")
-
     enrollment_id_raw = request.GET.get("id", "").strip()
     if not enrollment_id_raw.isdigit():
         messages.info(request, "Submit an enrollment request to view this page.")
         return redirect("courses")
 
-    enrollment = (
-        Enrollment.objects.filter(pk=int(enrollment_id_raw), user=request.user)
-        .select_related("course")
-        .first()
-    )
+    enrollment_id = int(enrollment_id_raw)
+    enrollment_qs = Enrollment.objects.filter(pk=enrollment_id).select_related("course")
+    if request.user.is_authenticated:
+        enrollment = enrollment_qs.filter(user=request.user).first()
+    else:
+        guest_enrollment_id = int(request.session.get("guest_enrollment_id", 0) or 0)
+        if guest_enrollment_id != enrollment_id:
+            messages.info(request, "Submit an enrollment request to view this page.")
+            return redirect("courses")
+        enrollment = enrollment_qs.filter(user__isnull=True).first()
+
     if not enrollment:
         messages.error(request, "Enrollment record was not found.")
         return redirect("courses")
@@ -536,6 +535,19 @@ def download_pos_installer(request):
         filename=filename,
         content_type="application/octet-stream",
     )
+
+
+def attendance_portal(request):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please login to access staff attendance.")
+        return redirect(f"{reverse('login')}?next={quote(request.get_full_path())}")
+    if not request.user.is_staff:
+        messages.error(request, "Only staff users can access attendance.")
+        return redirect("home")
+
+    attendance_url = getattr(settings, "ATTENDANCE_URL", "").strip() or "http://192.168.0.105:8002/"
+
+    return redirect(attendance_url)
 
 
 def admin_dashboard(request):

@@ -135,6 +135,7 @@ Then open:
 - `DEFAULT_FROM_EMAIL`
 - `SERVER_EMAIL`
 - `CONTACT_RECEIVER_EMAIL` (your inbox for contact form notifications)
+- `ATTENDANCE_URL` (staff attendance system URL, e.g. `http://192.168.0.105:8002/`)
 - `POS_INSTALLER_PATH` (local `.exe` path, default points to `~/Documents/GitHub/mahilmart-pos/installer/output/MahilMartPOS-Setup.exe`)
 - `POS_INSTALLER_URL` (optional external download URL, e.g. GitHub Releases)
 - `POS_INSTALLER_FILENAME`

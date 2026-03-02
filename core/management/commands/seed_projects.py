@@ -22,6 +22,7 @@ PROJECTS = [
             "- Reports and activity logs\n\n"
             "Install using the official setup package."
         ),
+        "github_url": "",
         "install_url": "",
         "version": "1.0.0",
         "is_active": True,

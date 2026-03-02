@@ -50,6 +50,9 @@
       <div class="hero-actions">
         <a class="btn btn-solid" href="{% url 'courses' %}">Explore Courses</a>
         <a class="btn btn-outline" href="{% url 'contact' %}">Talk to Our Team</a>
+        {% if user.is_authenticated and user.is_staff %}
+          <a class="btn btn-light" href="{% url 'attendance_portal' %}">Staff Attendance</a>
+        {% endif %}
         {% if pos_installer_enabled %}
           <a class="btn btn-light" href="{% url 'download_pos_installer' %}">Install MahilMart POS</a>
         {% elif not user.is_authenticated %}
@@ -120,6 +123,9 @@
           <p>{{ project.short_description|truncatechars:130 }}</p>
           <div class="hero-actions">
             <a class="btn btn-outline" href="{% url 'project_detail' project.slug %}">Details</a>
+            {% if project.github_url %}
+              <a class="btn btn-light" href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+            {% endif %}
             {% if project.install_link %}
               <a class="btn btn-solid" href="{{ project.install_link }}">Install</a>
             {% endif %}
